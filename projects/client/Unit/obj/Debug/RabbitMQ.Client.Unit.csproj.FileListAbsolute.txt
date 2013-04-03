@@ -1,0 +1,10 @@
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\build\bin\unit-tests.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\build\bin\unit-tests.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\build\bin\nunit.framework.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\build\bin\RabbitMQ.Client.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\build\bin\RabbitMQ.Client.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\build\bin\RabbitMQ.Client.xml
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\build\bin\nunit.framework.xml
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\obj\Debug\RabbitMQ.Client.Unit.csprojResolveAssemblyReference.cache
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\obj\Debug\unit-tests.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Unit\obj\Debug\unit-tests.pdb

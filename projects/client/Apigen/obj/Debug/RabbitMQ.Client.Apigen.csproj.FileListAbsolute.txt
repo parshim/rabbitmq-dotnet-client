@@ -1,0 +1,7 @@
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Apigen\build\bin\rabbitmq-dotnet-apigen.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Apigen\build\bin\rabbitmq-dotnet-apigen.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Apigen\build\bin\apigen-bootstrap.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Apigen\build\bin\apigen-bootstrap.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Apigen\obj\Debug\RabbitMQ.Client.Apigen.csprojResolveAssemblyReference.cache
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Apigen\obj\Debug\rabbitmq-dotnet-apigen.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\Apigen\obj\Debug\rabbitmq-dotnet-apigen.pdb

@@ -49,7 +49,7 @@ namespace RabbitMQ.ServiceModel
     using RabbitMQ.Client;
     using System.Diagnostics;
 
-    internal sealed class RabbitMQChannelListener<TChannel> : RabbitMQChannelListenerBase<IInputChannel> where TChannel : class, IChannel
+    internal sealed class RabbitMQChannelListener : RabbitMQChannelListenerBase<IInputChannel>
     {
 
         private IInputChannel m_channel;

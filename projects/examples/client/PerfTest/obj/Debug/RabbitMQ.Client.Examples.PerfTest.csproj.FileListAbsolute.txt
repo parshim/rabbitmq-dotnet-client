@@ -1,0 +1,7 @@
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\PerfTest\build\bin\PerfTest.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\PerfTest\build\bin\PerfTest.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\PerfTest\build\bin\RabbitMQ.Client.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\PerfTest\build\bin\RabbitMQ.Client.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\PerfTest\build\bin\RabbitMQ.Client.xml
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\PerfTest\obj\Debug\PerfTest.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\PerfTest\obj\Debug\PerfTest.pdb

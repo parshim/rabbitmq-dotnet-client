@@ -1,0 +1,11 @@
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\build\bin\WcfServiceLibrary1.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\build\bin\WcfServiceLibrary1.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\build\bin\RabbitMQ.ServiceModel.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\build\bin\RabbitMQ.Client.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\build\bin\RabbitMQ.ServiceModel.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\build\bin\RabbitMQ.ServiceModel.xml
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\build\bin\RabbitMQ.Client.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\build\bin\RabbitMQ.Client.xml
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\obj\Debug\RabbitMQ.ServiceModel.Examples.ConfigDemo.WcfServiceLibrary1.csprojResolveAssemblyReference.cache
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\obj\Debug\WcfServiceLibrary1.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\wcf\configDemo\WcfServiceLibrary1\obj\Debug\WcfServiceLibrary1.pdb

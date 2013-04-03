@@ -39,6 +39,7 @@
 //---------------------------------------------------------------------------
 
 
+
 namespace RabbitMQ.ServiceModel
 {
     using System;
@@ -87,7 +88,9 @@ namespace RabbitMQ.ServiceModel
 #endif
                 Message result = m_encoder.ReadMessage(new MemoryStream(msg.Body), (int)m_bindingElement.MaxReceivedMessageSize);
                 result.Headers.To = base.LocalAddress.Uri;
-                m_messageQueue.Model.BasicAck(msg.DeliveryTag, false);
+                result.Headers.Add(MessageHeader.CreateHeader("DeliveryTag", @"http://schemas.rabbitmq.com/2007/RabbitMQ/", msg.DeliveryTag));
+
+                // Ack(msg.DeliveryTag);
 #if VERBOSE
                 DebugHelper.Stop(" #### Message.Receive {{\n\tAction={2}, \n\tBytes={1}, \n\tTime={0}ms}}.",
                         msg.Body.Length,
@@ -161,6 +164,16 @@ namespace RabbitMQ.ServiceModel
             DebugHelper.Stop(" ## In.Channel.Open {{\n\tAddress={1}, \n\tTime={0}ms}}.", LocalAddress.Uri.PathAndQuery);
 #endif
             OnOpened();
+        }
+
+        internal void Reject(ulong deliveryTag, bool requeue)
+        {
+             m_messageQueue.Model.BasicReject(deliveryTag, requeue);
+        }
+
+        internal void Ack(ulong deliveryTag)
+        {
+            m_messageQueue.Model.BasicAck(deliveryTag, false);
         }
     }
 }

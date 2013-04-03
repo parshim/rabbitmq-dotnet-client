@@ -1,0 +1,8 @@
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\LogTail\build\bin\LogTail.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\LogTail\build\bin\LogTail.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\LogTail\build\bin\RabbitMQ.Client.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\LogTail\build\bin\RabbitMQ.Client.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\LogTail\build\bin\RabbitMQ.Client.xml
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\LogTail\obj\Debug\RabbitMQ.Client.Examples.LogTail.csprojResolveAssemblyReference.cache
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\LogTail\obj\Debug\LogTail.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\LogTail\obj\Debug\LogTail.pdb

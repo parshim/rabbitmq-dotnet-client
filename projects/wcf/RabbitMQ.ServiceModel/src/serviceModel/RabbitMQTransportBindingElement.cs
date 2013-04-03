@@ -97,7 +97,7 @@ namespace RabbitMQ.ServiceModel
             if (HostName == null)
                 throw new InvalidOperationException("No broker was specified.");
 
-            return (IChannelListener<TChannel>)((object)new RabbitMQChannelListener<TChannel>(context));
+            return (IChannelListener<TChannel>)((object)new RabbitMQChannelListener(context));
         }
 
         public override bool CanBuildChannelFactory<TChannel>(BindingContext context)

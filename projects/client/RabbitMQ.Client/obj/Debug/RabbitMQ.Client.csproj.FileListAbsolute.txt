@@ -1,0 +1,5 @@
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\RabbitMQ.Client\build\bin\RabbitMQ.Client.xml
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\RabbitMQ.Client\build\bin\RabbitMQ.Client.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\RabbitMQ.Client\build\bin\RabbitMQ.Client.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\RabbitMQ.Client\obj\Debug\RabbitMQ.Client.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\client\RabbitMQ.Client\obj\Debug\RabbitMQ.Client.pdb

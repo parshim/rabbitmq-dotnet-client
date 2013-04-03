@@ -1,0 +1,8 @@
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\AddClient\build\bin\AddClient.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\AddClient\build\bin\AddClient.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\AddClient\build\bin\RabbitMQ.Client.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\AddClient\build\bin\RabbitMQ.Client.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\AddClient\build\bin\RabbitMQ.Client.xml
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\AddClient\obj\Debug\RabbitMQ.Client.Examples.AddClient.csprojResolveAssemblyReference.cache
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\AddClient\obj\Debug\AddClient.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\AddClient\obj\Debug\AddClient.pdb

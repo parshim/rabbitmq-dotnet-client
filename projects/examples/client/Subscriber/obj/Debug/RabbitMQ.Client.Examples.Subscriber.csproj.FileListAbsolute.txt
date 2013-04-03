@@ -1,0 +1,7 @@
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\Subscriber\build\bin\Subscriber.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\Subscriber\build\bin\Subscriber.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\Subscriber\build\bin\RabbitMQ.Client.dll
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\Subscriber\build\bin\RabbitMQ.Client.pdb
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\Subscriber\build\bin\RabbitMQ.Client.xml
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\Subscriber\obj\Debug\Subscriber.exe
+C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\Subscriber\obj\Debug\Subscriber.pdb
