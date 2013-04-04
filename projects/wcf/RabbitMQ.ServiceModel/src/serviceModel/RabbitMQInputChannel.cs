@@ -153,7 +153,7 @@ namespace RabbitMQ.ServiceModel
             DebugHelper.Start();
 #endif
             //Create a queue for messages destined to this service, bind it to the service URI routing key
-            string queue = m_model.QueueDeclare();
+            string queue = m_model.QueueDeclare(LocalAddress.Uri.AbsolutePath, true, false, false, null);
             m_model.QueueBind(queue, Exchange, base.LocalAddress.Uri.PathAndQuery, null);
 
             //Listen to the queue
