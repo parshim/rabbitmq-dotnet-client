@@ -91,6 +91,13 @@ namespace RabbitMQ.ServiceModel
                 result.Headers.Add(MessageHeader.CreateHeader("DeliveryTag", @"http://schemas.rabbitmq.com/2007/RabbitMQ/", msg.DeliveryTag));
 
                 // Ack(msg.DeliveryTag);
+
+                using (FileStream s = new FileStream(@"C:\temp\message.txt", FileMode.CreateNew))
+                {
+                    m_encoder.WriteMessage(result, s);
+                }
+
+                
 #if VERBOSE
                 DebugHelper.Stop(" #### Message.Receive {{\n\tAction={2}, \n\tBytes={1}, \n\tTime={0}ms}}.",
                         msg.Body.Length,
