@@ -1,0 +1,52 @@
+<?xml version="1.0" encoding="UTF-8"?><?xml-stylesheet type='text/xsl' href='_UpgradeReport_Files/UpgradeReport.xslt'?><UpgradeLog>
+<Properties><Property Name="Solution" Value="RabbitMQDotNetClient">
+</Property><Property Name="Solution File" Value="C:\Users\MichaelP\Documents\GitHub\rabbitmq-dotnet-client\RabbitMQDotNetClient.sln">
+</Property><Property Name="Date" Value="Thursday, September 12, 2013">
+</Property><Property Name="Time" Value="14:55 PM">
+</Property></Properties><Event ErrorLevel="0" Project="RabbitMQ.Client.ApigenBootstrap" Source="projects\client\ApigenBootstrap\RabbitMQ.Client.ApigenBootstrap.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.ApigenBootstrap" Source="projects\client\ApigenBootstrap\RabbitMQ.Client.ApigenBootstrap.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Apigen" Source="projects\client\Apigen\RabbitMQ.Client.Apigen.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Apigen" Source="projects\client\Apigen\RabbitMQ.Client.Apigen.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client" Source="projects\client\RabbitMQ.Client\RabbitMQ.Client.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client" Source="projects\client\RabbitMQ.Client\RabbitMQ.Client.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Unit" Source="projects\client\Unit\RabbitMQ.Client.Unit.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Unit" Source="projects\client\Unit\RabbitMQ.Client.Unit.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.ServiceModel" Source="projects\wcf\RabbitMQ.ServiceModel\RabbitMQ.ServiceModel.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.ServiceModel" Source="projects\wcf\RabbitMQ.ServiceModel\RabbitMQ.ServiceModel.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.AddClient" Source="projects\examples\client\AddClient\RabbitMQ.Client.Examples.AddClient.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.AddClient" Source="projects\examples\client\AddClient\RabbitMQ.Client.Examples.AddClient.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.AddServer" Source="projects\examples\client\AddServer\RabbitMQ.Client.Examples.AddServer.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.AddServer" Source="projects\examples\client\AddServer\RabbitMQ.Client.Examples.AddServer.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.DeclareQueue" Source="projects\examples\client\DeclareQueue\RabbitMQ.Client.Examples.DeclareQueue.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.DeclareQueue" Source="projects\examples\client\DeclareQueue\RabbitMQ.Client.Examples.DeclareQueue.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.ExceptionTest" Source="projects\examples\client\ExceptionTest\RabbitMQ.Client.Examples.ExceptionTest.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.ExceptionTest" Source="projects\examples\client\ExceptionTest\RabbitMQ.Client.Examples.ExceptionTest.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.LogTail" Source="projects\examples\client\LogTail\RabbitMQ.Client.Examples.LogTail.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.LogTail" Source="projects\examples\client\LogTail\RabbitMQ.Client.Examples.LogTail.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.LowlevelLogTail" Source="projects\examples\client\LowlevelLogTail\RabbitMQ.Client.Examples.LowlevelLogTail.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.LowlevelLogTail" Source="projects\examples\client\LowlevelLogTail\RabbitMQ.Client.Examples.LowlevelLogTail.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.SendMap" Source="projects\examples\client\SendMap\RabbitMQ.Client.Examples.SendMap.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.SendMap" Source="projects\examples\client\SendMap\RabbitMQ.Client.Examples.SendMap.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.SendString" Source="projects\examples\client\SendString\RabbitMQ.Client.Examples.SendString.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.SendString" Source="projects\examples\client\SendString\RabbitMQ.Client.Examples.SendString.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.SingleGet" Source="projects\examples\client\SingleGet\RabbitMQ.Client.Examples.SingleGet.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.SingleGet" Source="projects\examples\client\SingleGet\RabbitMQ.Client.Examples.SingleGet.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.ServiceModel.Examples.ConfigDemo.Client" Source="projects\examples\wcf\configDemo\Client\RabbitMQ.ServiceModel.Examples.ConfigDemo.Client.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.ServiceModel.Examples.ConfigDemo.Client" Source="projects\examples\wcf\configDemo\Client\RabbitMQ.ServiceModel.Examples.ConfigDemo.Client.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.ServiceModel.Examples.ConfigDemo.Server" Source="projects\examples\wcf\configDemo\Server\RabbitMQ.ServiceModel.Examples.ConfigDemo.Server.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.ServiceModel.Examples.ConfigDemo.Server" Source="projects\examples\wcf\configDemo\Server\RabbitMQ.ServiceModel.Examples.ConfigDemo.Server.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.ServiceModel.Examples.ConfigDemo.WcfServiceLibrary1" Source="projects\examples\wcf\configDemo\WcfServiceLibrary1\RabbitMQ.ServiceModel.Examples.ConfigDemo.WcfServiceLibrary1.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.ServiceModel.Examples.ConfigDemo.WcfServiceLibrary1" Source="projects\examples\wcf\configDemo\WcfServiceLibrary1\RabbitMQ.ServiceModel.Examples.ConfigDemo.WcfServiceLibrary1.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.ServiceModel.Test" Source="projects\examples\wcf\Test\RabbitMQ.ServiceModel.Test.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.ServiceModel.Test" Source="projects\examples\wcf\Test\RabbitMQ.ServiceModel.Test.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.ShutdownableClient" Source="projects\examples\client\ShutdownableClient\RabbitMQ.Client.Examples.ShutdownableClient.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.ShutdownableClient" Source="projects\examples\client\ShutdownableClient\RabbitMQ.Client.Examples.ShutdownableClient.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.ShutdownableServer" Source="projects\examples\client\ShutdownableServer\RabbitMQ.Client.Examples.ShutdownableServer.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.ShutdownableServer" Source="projects\examples\client\ShutdownableServer\RabbitMQ.Client.Examples.ShutdownableServer.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.PerfTest" Source="projects\examples\client\PerfTest\RabbitMQ.Client.Examples.PerfTest.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.PerfTest" Source="projects\examples\client\PerfTest\RabbitMQ.Client.Examples.PerfTest.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="RabbitMQ.Client.Examples.Subscriber" Source="projects\examples\client\Subscriber\RabbitMQ.Client.Examples.Subscriber.csproj" Description="The project file does not require conversion.">
+</Event><Event ErrorLevel="3" Project="RabbitMQ.Client.Examples.Subscriber" Source="projects\examples\client\Subscriber\RabbitMQ.Client.Examples.Subscriber.csproj" Description="No Conversion Required">
+</Event><Event ErrorLevel="0" Project="" Source="RabbitMQDotNetClient.sln" Description="Solution converted successfully">
+</Event><Event ErrorLevel="3" Project="" Source="RabbitMQDotNetClient.sln" Description="Converted">
+</Event></UpgradeLog>
