@@ -101,7 +101,7 @@ namespace RabbitMQ.Client.Unit
 
             ResetTimer();
             object v;
-            bool r = k.GetValue(TimingInterval, out v);
+            bool r = k.GetValue((int) TimingInterval.TotalMilliseconds, out v);
             Assert.Greater(SafetyMargin, ElapsedMs());
             Assert.IsTrue(r);
             Assert.AreEqual(123, v);
@@ -114,8 +114,8 @@ namespace RabbitMQ.Client.Unit
 
             ResetTimer();
             object v;
-            bool r = k.GetValue(TimingInterval, out v);
-            Assert.Less(TimingInterval - SafetyMargin, ElapsedMs());
+            bool r = k.GetValue((int) TimingInterval.TotalMilliseconds, out v);
+            Assert.Less((int)TimingInterval.Subtract(SafetyMargin).TotalMilliseconds, ElapsedMs());
             Assert.IsTrue(!r);
             Assert.AreEqual(null, v);
         }
@@ -137,12 +137,12 @@ namespace RabbitMQ.Client.Unit
         public void TestTimeoutInfinite()
         {
             BlockingCell k = new BlockingCell();
-            SetAfter(TimingInterval, k, 123);
+            SetAfter((int) TimingInterval.TotalMilliseconds, k, 123);
 
             ResetTimer();
             object v;
             bool r = k.GetValue(Timeout.Infinite, out v);
-            Assert.Less(TimingInterval - SafetyMargin, ElapsedMs());
+            Assert.Less((int)TimingInterval.Subtract(SafetyMargin).TotalMilliseconds, ElapsedMs());
             Assert.IsTrue(r);
             Assert.AreEqual(123, v);
         }
@@ -151,12 +151,12 @@ namespace RabbitMQ.Client.Unit
         public void TestBgShort()
         {
             BlockingCell k = new BlockingCell();
-            SetAfter(TimingInterval, k, 123);
+            SetAfter((int) TimingInterval.TotalMilliseconds, k, 123);
 
             ResetTimer();
             object v;
-            bool r = k.GetValue(TimingInterval * 2, out v);
-            Assert.Less(TimingInterval - SafetyMargin, ElapsedMs());
+            bool r = k.GetValue((int) TimingInterval.TotalMilliseconds * 2, out v);
+            Assert.Less((int)TimingInterval.Subtract(SafetyMargin).TotalMilliseconds, ElapsedMs());
             Assert.IsTrue(r);
             Assert.AreEqual(123, v);
         }
@@ -165,12 +165,12 @@ namespace RabbitMQ.Client.Unit
         public void TestBgLong()
         {
             BlockingCell k = new BlockingCell();
-            SetAfter(TimingInterval * 2, k, 123);
+            SetAfter((int) TimingInterval.TotalMilliseconds * 2, k, 123);
 
             ResetTimer();
             object v;
-            bool r = k.GetValue(TimingInterval, out v);
-            Assert.Greater(TimingInterval + SafetyMargin, ElapsedMs());
+            bool r = k.GetValue((int) TimingInterval.TotalMilliseconds, out v);
+            Assert.Greater((int)TimingInterval.Add(SafetyMargin).TotalMilliseconds, ElapsedMs());
             Assert.IsTrue(!r);
             Assert.AreEqual(null, v);
         }

@@ -38,6 +38,7 @@
 //  Copyright (c) 2007-2013 VMware, Inc.  All rights reserved.
 //---------------------------------------------------------------------------
 
+using System;
 using NUnit.Framework;
 
 namespace RabbitMQ.Client.Unit
@@ -66,7 +67,7 @@ namespace RabbitMQ.Client.Unit
 
     public class TimingFixture
     {
-        public static readonly int TimingInterval = 200;
-        public static readonly int SafetyMargin = 50;
+        public static readonly TimeSpan TimingInterval = TimeSpan.FromMilliseconds(200);
+        public static readonly TimeSpan SafetyMargin = TimeSpan.FromMilliseconds(50);
     }
 }

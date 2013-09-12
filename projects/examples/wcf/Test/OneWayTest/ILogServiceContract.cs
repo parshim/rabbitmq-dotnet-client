@@ -47,7 +47,7 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
     [ServiceContract]
     public interface ILogServiceContract
     {
-        [OperationContract(IsOneWay=true)]
+        [OperationContract(IsOneWay=true), TransactionFlow(TransactionFlowOption.Allowed)]
         void Log(LogData entry);
     }
 }

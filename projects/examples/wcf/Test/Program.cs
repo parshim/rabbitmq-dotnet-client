@@ -51,7 +51,8 @@ namespace RabbitMQ.ServiceModel.Test
 
     class Program
     {
-        public static Binding GetBinding() {
+        public static RabbitMQBinding GetBinding()
+        {
             //return new WSHttpBinding();
             
             return new RabbitMQBinding(System.Configuration.ConfigurationManager.AppSettings["manual-test-broker-hostname"],

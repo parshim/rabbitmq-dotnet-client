@@ -62,6 +62,7 @@ namespace RabbitMQ.ServiceModel
         private TextMessageEncodingBindingElement m_encoding;
         private bool m_isInitialized;
         private bool m_oneWayOnly;
+        private bool m_exactlyOnce;
         private ReliableSessionBindingElement m_session;
         private TransactionFlowBindingElement m_transactionFlow;
         private bool m_transactionsEnabled;
@@ -121,8 +122,8 @@ namespace RabbitMQ.ServiceModel
             this.Transport.Username = username;
             this.Transport.Password = password;
             this.Transport.VirtualHost = virtualhost;
+            this.Transport.TransactedReceiveEnabled = false;
             this.MaxMessageSize = maxMessageSize;
-
         }
 
         /// <summary>
@@ -145,6 +146,8 @@ namespace RabbitMQ.ServiceModel
             m_transport.HostName = this.HostName;
             m_transport.Port = this.Port;
             m_transport.BrokerProtocol = this.BrokerProtocol;
+            m_transport.TransactedReceiveEnabled = this.ExactlyOnce;
+            m_transport.TTL = this.TTL;
             if (MaxMessageSize != DefaultMaxMessageSize)
             {
                 m_transport.MaxReceivedMessageSize = MaxMessageSize;
@@ -265,5 +268,18 @@ namespace RabbitMQ.ServiceModel
             get { return m_oneWayOnly; }
             set { m_oneWayOnly = value; }
         }
+
+        /// <summary>
+        /// Enables transactional message delivery
+        /// </summary>
+        [ConfigurationProperty("exactlyOnce")]
+        public bool ExactlyOnce
+        {
+            get { return m_exactlyOnce; }
+            set { m_exactlyOnce = value; }
+        }
+
+        [ConfigurationProperty("TTL")]
+        public string TTL { get; set; }
     }
 }

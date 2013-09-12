@@ -38,42 +38,42 @@
 //  Copyright (c) 2007-2013 VMware, Inc.  All rights reserved.
 //---------------------------------------------------------------------------
 
-
+using System.Collections;
+using System.Collections.Generic;
+using CommonFraming = RabbitMQ.Client.Framing.v0_9;
 
 namespace RabbitMQ.ServiceModel
 {
     using System;
-    using System.Diagnostics;
     using System.IO;
     using System.ServiceModel;
     using System.ServiceModel.Channels;
 
-    using RabbitMQ.Client;
-    using RabbitMQ.Client.Events;
+    using Client;
+    using Client.Events;
 
     // We use spec version 0-9 for common constants such as frame types,
     // error codes, and the frame end byte, since they don't vary *within
     // the versions we support*. Obviously we may need to revisit this if
     // that ever changes.
-    using CommonFraming = RabbitMQ.Client.Framing.v0_9;
 
     internal sealed class RabbitMQInputChannel : RabbitMQInputChannelBase
     {
-        private RabbitMQTransportBindingElement m_bindingElement;
-        private MessageEncoder m_encoder;
-        private IModel m_model;
-        private QueueingBasicConsumer m_messageQueue;
-
-        public RabbitMQInputChannel(BindingContext context, IModel model, EndpointAddress address)
+        private readonly RabbitMQTransportBindingElement m_bindingElement;
+        private readonly MessageEncoder m_encoder;
+        private readonly IModel m_model;
+        private IMessageQueue m_messageQueue;
+        private readonly bool m_isTemporary;
+        
+        public RabbitMQInputChannel(BindingContext context, IModel model, EndpointAddress address, bool isTemporary)
             : base(context, address)
         {
             m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
             TextMessageEncodingBindingElement encoderElem = context.BindingParameters.Find<TextMessageEncodingBindingElement>();
             encoderElem.ReaderQuotas.MaxStringContentLength = (int)m_bindingElement.MaxReceivedMessageSize;
-            if (encoderElem != null) {
-                m_encoder = encoderElem.CreateMessageEncoderFactory().Encoder;
-            }
+            m_encoder = encoderElem.CreateMessageEncoderFactory().Encoder;
             m_model = model;
+            m_isTemporary = isTemporary;
             m_messageQueue = null;
         }
 
@@ -82,28 +82,24 @@ namespace RabbitMQ.ServiceModel
         {
             try
             {
-                BasicDeliverEventArgs msg = m_messageQueue.Queue.Dequeue() as BasicDeliverEventArgs;
+                BasicDeliverEventArgs result;
+
+                if (!m_messageQueue.Dequeue(timeout, out result))
+                {
+                    return null;
+                }
 #if VERBOSE
                 DebugHelper.Start();
 #endif
-                Message result = m_encoder.ReadMessage(new MemoryStream(msg.Body), (int)m_bindingElement.MaxReceivedMessageSize);
-                result.Headers.To = base.LocalAddress.Uri;
-                result.Headers.Add(MessageHeader.CreateHeader("DeliveryTag", @"http://schemas.rabbitmq.com/2007/RabbitMQ/", msg.DeliveryTag));
+                Message message = m_encoder.ReadMessage(new MemoryStream(result.Body), (int)m_bindingElement.MaxReceivedMessageSize);
+                message.Headers.To = LocalAddress.Uri;
 
-                // Ack(msg.DeliveryTag);
-
-                using (FileStream s = new FileStream(@"C:\temp\message.txt", FileMode.CreateNew))
-                {
-                    m_encoder.WriteMessage(result, s);
-                }
-
-                
 #if VERBOSE
                 DebugHelper.Stop(" #### Message.Receive {{\n\tAction={2}, \n\tBytes={1}, \n\tTime={0}ms}}.",
                         msg.Body.Length,
                         result.Headers.Action.Remove(0, result.Headers.Action.LastIndexOf('/')));
 #endif
-                return result;
+                return message;
             }
             catch (EndOfStreamException)
             {
@@ -119,19 +115,18 @@ namespace RabbitMQ.ServiceModel
         public override bool TryReceive(TimeSpan timeout, out Message message)
         {
             message = Receive(timeout);
-            return true;
+            return message != null;
         }
 
         public override bool WaitForMessage(TimeSpan timeout)
         {
-            throw new NotImplementedException();
+            return m_messageQueue.WaitForMessage(timeout);
         }
 
         public override void Close(TimeSpan timeout)
         {
 
-            if (base.State == CommunicationState.Closed
-                || base.State == CommunicationState.Closing)
+            if (State == CommunicationState.Closed || State == CommunicationState.Closing)
             {
                 return; // Ignore the call, we're already closing.
             }
@@ -140,10 +135,8 @@ namespace RabbitMQ.ServiceModel
 #if VERBOSE
             DebugHelper.Start();
 #endif
-            if (m_messageQueue != null) {
-                m_model.BasicCancel(m_messageQueue.ConsumerTag);
-                m_messageQueue = null;
-            }
+            m_model.BasicCancel(m_messageQueue.ConsumerTag);
+
 #if VERBOSE
             DebugHelper.Stop(" ## In.Channel.Close {{\n\tAddress={1}, \n\tTime={0}ms}}.", LocalAddress.Uri.PathAndQuery);
 #endif
@@ -159,13 +152,46 @@ namespace RabbitMQ.ServiceModel
 #if VERBOSE
             DebugHelper.Start();
 #endif
-            //Create a queue for messages destined to this service, bind it to the service URI routing key
-            string queue = m_model.QueueDeclare(LocalAddress.Uri.AbsolutePath, true, false, false, null);
-            m_model.QueueBind(queue, Exchange, base.LocalAddress.Uri.PathAndQuery, null);
+            string exchange = GetExchangeName(LocalAddress);
+            string queue = GetQueueName(LocalAddress);
+            string routingKey = GetRoutingKey(LocalAddress);
+
+            if (m_isTemporary)
+            {
+                queue = m_model.QueueDeclare(queue, false, false, true, null);
+            }
+            else
+            {
+                IDictionary args = new Dictionary<String, Object>();
+
+                int ttl;
+                if (!string.IsNullOrEmpty(m_bindingElement.TTL) && int.TryParse(m_bindingElement.TTL, out ttl))
+                {
+                    args.Add("x-message-ttl", ttl);
+                }
+
+                //Create a queue for messages destined to this service, bind it to the service URI routing key
+                queue = m_model.QueueDeclare(queue, true, false, false, args); 
+            }
+            
+            m_model.QueueBind(queue, exchange, routingKey, null);
+
+            QueueingBasicConsumerBase queueingBasicConsumer;
+
+            // Create queue
+            if (m_bindingElement.TransactedReceiveEnabled)
+            {
+                queueingBasicConsumer = new TransactionalQueueConsumer(m_model);
+            }
+            else
+            {
+                queueingBasicConsumer = new QueueingAutoAckConsumer(m_model);
+            }
+
+            m_messageQueue = queueingBasicConsumer;
 
             //Listen to the queue
-            m_messageQueue = new QueueingBasicConsumer(m_model);
-            m_model.BasicConsume(queue, false, m_messageQueue);
+            m_model.BasicConsume(queue, false, queueingBasicConsumer);
 
 #if VERBOSE
             DebugHelper.Stop(" ## In.Channel.Open {{\n\tAddress={1}, \n\tTime={0}ms}}.", LocalAddress.Uri.PathAndQuery);
@@ -173,14 +199,5 @@ namespace RabbitMQ.ServiceModel
             OnOpened();
         }
 
-        internal void Reject(ulong deliveryTag, bool requeue)
-        {
-             m_messageQueue.Model.BasicReject(deliveryTag, requeue);
-        }
-
-        internal void Ack(ulong deliveryTag)
-        {
-            m_messageQueue.Model.BasicAck(deliveryTag, false);
-        }
     }
 }

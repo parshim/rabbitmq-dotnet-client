@@ -86,6 +86,8 @@ namespace RabbitMQ.ServiceModel
                 this.MaxMessageSize = rabbind.MaxMessageSize;
                 this.OneWayOnly = rabbind.OneWayOnly;
                 this.TransactionFlowEnabled = rabbind.TransactionFlow;
+                this.ExactlyOnce = rabbind.ExactlyOnce;
+                this.TTL = rabbind.TTL;
                 this.VirtualHost = rabbind.Transport.ConnectionFactory.VirtualHost;
                 this.Username = rabbind.Transport.ConnectionFactory.UserName;
                 this.Password = rabbind.Transport.ConnectionFactory.Password;
@@ -111,10 +113,22 @@ namespace RabbitMQ.ServiceModel
             rabbind.BrokerProtocol = this.Protocol;
             rabbind.OneWayOnly = this.OneWayOnly;
             rabbind.TransactionFlow = this.TransactionFlowEnabled;
+            rabbind.TTL = this.TTL;
+            rabbind.ExactlyOnce = this.ExactlyOnce;
             rabbind.Transport.Password = this.Password;
             rabbind.Transport.Username = this.Username;
             rabbind.Transport.VirtualHost = this.VirtualHost;
             rabbind.Transport.MaxReceivedMessageSize = this.MaxMessageSize;
+        }
+
+        /// <summary>
+        /// Enables transactional message delivery
+        /// </summary>
+        [ConfigurationProperty("exactlyOnce")]
+        public bool ExactlyOnce
+        {
+            get { return ((bool)base["exactlyOnce"]); }
+            set { base["exactlyOnce"] = value; }
         }
 
         /// <summary>
@@ -166,6 +180,16 @@ namespace RabbitMQ.ServiceModel
         {
             get { return ((bool)base["transactionFlow"]); }
             set { base["transactionFlow"] = value; }
+        }
+
+        /// <summary>
+        /// Specifies message TTL. For client side binding it will be per message TTL, for service side binding it will be per-queue message TTL. Use null or discard to diable message TTL.
+        /// </summary>
+        [ConfigurationProperty("TTL", DefaultValue = null)]
+        public string TTL
+        {
+            get { return ((string)base["TTL"]); }
+            set { base["TTL"] = value; }
         }
 
         /// <summary>

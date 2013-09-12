@@ -69,7 +69,7 @@ namespace RabbitMQ.ServiceModel
             if (m_channel != null)
                 return null;
 
-            m_channel = new RabbitMQInputChannel(Context, m_model, new EndpointAddress(Uri.ToString()));
+            m_channel = new RabbitMQInputChannel(Context, m_model, new EndpointAddress(Uri.ToString()), IsTemporary);
             m_channel.Closed += new EventHandler(ListenChannelClosed);
             return m_channel;
         }

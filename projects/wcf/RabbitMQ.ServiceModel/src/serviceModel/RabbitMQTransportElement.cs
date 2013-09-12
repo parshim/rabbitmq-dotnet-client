@@ -71,6 +71,7 @@ namespace RabbitMQ.ServiceModel
             rabbind.ConnectionFactory.Password = this.Password;
             rabbind.ConnectionFactory.UserName = this.Username;
             rabbind.ConnectionFactory.VirtualHost = this.VirtualHost;
+            rabbind.TransactedReceiveEnabled = this.ExactlyOnce;
         }
 
         public override void CopyFrom(ServiceModelExtensionElement from)
@@ -85,6 +86,7 @@ namespace RabbitMQ.ServiceModel
                 this.Password = element.Password;
                 this.Username = element.Username;
                 this.VirtualHost = element.VirtualHost;
+                this.ExactlyOnce = element.ExactlyOnce;
             }
         }
 
@@ -186,6 +188,12 @@ namespace RabbitMQ.ServiceModel
             }
         }
 
+        /// <summary>
+        /// Enables transactional message delivery
+        /// </summary>
+        [ConfigurationProperty("exactlyOnce")]
+        public bool ExactlyOnce { get; set; }
+
         private IProtocol GetProtocol()
         {
             IProtocol result = Protocols.Lookup(this.ProtocolVersion);
@@ -240,5 +248,7 @@ namespace RabbitMQ.ServiceModel
                 return configProperties;
             }
         }
+
+       
     }
 }

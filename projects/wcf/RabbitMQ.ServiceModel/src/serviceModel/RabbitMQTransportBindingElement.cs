@@ -53,7 +53,7 @@ namespace RabbitMQ.ServiceModel
     /// <summary>
     /// Represents the binding element used to specify AMQP transport for transmitting messages.
     /// </summary>
-    public sealed class RabbitMQTransportBindingElement : TransportBindingElement
+    public sealed class RabbitMQTransportBindingElement : TransportBindingElement, ITransactedBindingElement
     {
         private ConnectionFactory m_connectionFactory;
         private IConnection m_connection;
@@ -82,6 +82,8 @@ namespace RabbitMQ.ServiceModel
             Password = other.Password;
             VirtualHost = other.VirtualHost;
             MaxReceivedMessageSize = other.MaxReceivedMessageSize;
+            TransactedReceiveEnabled = other.TransactedReceiveEnabled;
+            TTL = other.TTL;
         }
 
         
@@ -190,6 +192,25 @@ namespace RabbitMQ.ServiceModel
                 m_port = value;
                 m_connectionFactory = null;
             }
+        }
+
+        /// <summary>
+        /// Enables transactional message delivery
+        /// </summary>
+        [ConfigurationProperty("exactlyOnce")]
+        public bool TransactedReceiveEnabled
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Enables transactional message delivery
+        /// </summary>
+        [ConfigurationProperty("TTL")]
+        public string TTL
+        {
+            get;
+            set;
         }
 
         /// <summary>

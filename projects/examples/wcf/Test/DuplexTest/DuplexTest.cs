@@ -49,7 +49,7 @@ namespace RabbitMQ.ServiceModel.Test.DuplexTest
 
     public class DuplexTest : IServiceTest<IPizzaService>, IPizzaCallback
     {
-        Uri serverUri = new Uri("soap.amqp:///"); // TODO: Add Duplex Service Uri
+        Uri serverUri = new Uri("soap.amqp://amq.direct/DuplexTest"); // TODO: Add Duplex Service Uri
         ServiceHost service;
         ManualResetEvent mre;
 

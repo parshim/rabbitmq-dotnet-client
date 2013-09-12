@@ -42,27 +42,29 @@
 namespace RabbitMQ.ServiceModel
 {
     using System;
-    using System.Diagnostics;
     using System.IO;
     using System.ServiceModel;
     using System.ServiceModel.Channels;
 
-    using RabbitMQ.Client;
+    using Client;
 
     internal sealed class RabbitMQOutputChannel : RabbitMQOutputChannelBase
     {
         private RabbitMQTransportBindingElement m_bindingElement;
-        private MessageEncoder m_encoder;
-        private IModel m_model;
+        private readonly MessageEncoder m_encoder;
+        private readonly IModel m_model;
 
         public RabbitMQOutputChannel(BindingContext context, IModel model, EndpointAddress address)
             : base(context, address)
         {
-            m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
+            //m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
             MessageEncodingBindingElement encoderElement = context.Binding.Elements.Find<MessageEncodingBindingElement>();
             if (encoderElement != null) {
                 m_encoder = encoderElement.CreateMessageEncoderFactory().Encoder;
             }
+
+            m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
+
             m_model = model;
         }
 
@@ -70,7 +72,7 @@ namespace RabbitMQ.ServiceModel
         {
             if (message.State != MessageState.Closed)
             {
-                byte[] body = null;
+                byte[] body;
 #if VERBOSE
                 DebugHelper.Start();
 #endif
@@ -84,16 +86,29 @@ namespace RabbitMQ.ServiceModel
                     body.Length,
                     message.Headers.Action.Remove(0, message.Headers.Action.LastIndexOf('/')));
 #endif
-                m_model.BasicPublish(Exchange,
-                                   base.RemoteAddress.Uri.PathAndQuery,
-                                   null,
+                string exchange = GetExchangeName(RemoteAddress);
+                string routingKey = GetRoutingKey(RemoteAddress);
+
+                IBasicProperties basicProperties = m_model.CreateBasicProperties();
+                
+                // TODO: move message persistency to transport configuration
+                //basicProperties.SetPersistent(false);
+                
+                if (!string.IsNullOrEmpty(m_bindingElement.TTL))
+                {
+                    basicProperties.Expiration = m_bindingElement.TTL;
+                }
+
+                m_model.BasicPublish(exchange,
+                                   routingKey,
+                                   basicProperties,
                                    body);
             }
         }
 
         public override void Close(TimeSpan timeout)
         {
-            if (base.State == CommunicationState.Closed || base.State == CommunicationState.Closing)
+            if (State == CommunicationState.Closed || State == CommunicationState.Closing)
                 return; // Ignore the call, we're already closing.
 
             OnClosing();
@@ -102,10 +117,11 @@ namespace RabbitMQ.ServiceModel
 
         public override void Open(TimeSpan timeout)
         {
-            if (base.State != CommunicationState.Created && base.State != CommunicationState.Closed)
-                throw new InvalidOperationException(string.Format("Cannot open the channel from the {0} state.", base.State));
+            if (State != CommunicationState.Created && State != CommunicationState.Closed)
+                throw new InvalidOperationException(string.Format("Cannot open the channel from the {0} state.", State));
 
             OnOpening();
+
             OnOpened();
         }
     }

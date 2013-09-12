@@ -38,19 +38,36 @@
 //  Copyright (c) 2007-2013 VMware, Inc.  All rights reserved.
 //---------------------------------------------------------------------------
 
-
 namespace RabbitMQ.ServiceModel.Test.OneWayTest
 {
     using System;
     using System.ServiceModel;
 
-    [ServiceBehavior(InstanceContextMode=InstanceContextMode.Single)]
+    [ServiceBehavior(InstanceContextMode=InstanceContextMode.Single, ReleaseServiceInstanceOnTransactionComplete = false)]
     public class LogService : ILogServiceContract
     {
         public int m_i;
+
+        [OperationBehavior(TransactionScopeRequired = true)]
         public void Log(LogData entry)
         {
             Util.WriteLine(ConsoleColor.Magenta, "  [SVC] {3} [{0,-6}] {1, 12}: {2}", entry.Level, entry.TimeStamp, entry.Message, m_i++);
+        }
+    }
+    
+    [ServiceBehavior(InstanceContextMode=InstanceContextMode.Single, ConcurrencyMode = ConcurrencyMode.Single, ReleaseServiceInstanceOnTransactionComplete = false)]
+    public class AlternativeLogService : ILogServiceContract
+    {
+        public int m_i;
+
+        [OperationBehavior(TransactionScopeRequired = true)]
+        public void Log(LogData entry)
+        {
+            m_i++;
+
+            if (m_i % 2 == 0) throw new Exception("Error");
+
+            Util.WriteLine(ConsoleColor.DarkRed, "  [Alternative SVC] {3} [{0,-6}] {1, 12}: {2}", entry.Level, entry.TimeStamp, entry.Message, m_i);
         }
     }
 }

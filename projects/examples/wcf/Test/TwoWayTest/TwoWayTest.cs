@@ -55,7 +55,7 @@ namespace RabbitMQ.ServiceModel.Test.TwoWayTest
         public void StartService(Binding binding)
         {
             Util.Write(ConsoleColor.Yellow, "  Binding Service...");
-            m_service = new ServiceHost(typeof(Calculator), new Uri("soap.amqp:///"));
+            m_service = new ServiceHost(typeof(Calculator), new Uri("soap.amqp://amq.direct/"));
             m_service.AddServiceEndpoint(typeof(ICalculator), binding, "Calculator");
             m_service.Open();
             
@@ -73,7 +73,7 @@ namespace RabbitMQ.ServiceModel.Test.TwoWayTest
 
         public ICalculator GetClient(Binding binding)
         {
-            m_fac = new ChannelFactory<ICalculator>(binding, "soap.amqp:///Calculator");
+            m_fac = new ChannelFactory<ICalculator>(binding, "soap.amqp://amq.direct/Calculator");
             m_fac.Open();
             return m_fac.CreateChannel();
         }

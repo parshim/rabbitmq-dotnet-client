@@ -39,6 +39,8 @@
 //---------------------------------------------------------------------------
 
 
+using System.ServiceModel.Description;
+
 namespace RabbitMQ.ServiceModel.Test.OneWayTest
 {
     using System;
@@ -52,13 +54,15 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
     {
         private ChannelFactory<ILogServiceContract> m_factory;
         private ServiceHost m_host;
+        private ServiceHost m_alternativeHost;
         private bool m_serviceStarted;
         private ILogServiceContract m_client;
+        private Uri m_baseAddresses = new Uri("soap.amqp://amq.direct:2020/");
 
         public void BeginRun()
         {
             StartService(Program.GetBinding());
-
+        
             m_client = GetClient(Program.GetBinding());
             m_client.Log(new LogData(LogLevel.High, "Hello Rabbit"));
             m_client.Log(new LogData(LogLevel.Medium, "Hello Rabbit"));
@@ -70,27 +74,43 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
         public void Run()
         {
             BeginRun();
-            System.Threading.Thread.Sleep(500);
+            Thread.Sleep(2500);
             EndRun();
         }
 
         public void EndRun()
         {
             StopClient(m_client);
+            Thread.Sleep(2500);
             StopService();
         }
 
         public void StartService(Binding binding)
         {
-            Util.Write(ConsoleColor.Yellow, "  Binding Service...");
-            m_host = new ServiceHost(typeof(LogService), new Uri("soap.amqp:///"));
-            ((RabbitMQBinding)binding).OneWayOnly = true;
-            //host = new ServiceHost(typeof(LogService), new Uri("http://localhost/"));
-            
-            m_host.AddServiceEndpoint(typeof(ILogServiceContract), binding, "LogService");
-            m_host.Open();
-            m_serviceStarted = true;
+            m_host = new ServiceHost(typeof (LogService), m_baseAddresses);
+            m_alternativeHost = new ServiceHost(typeof(AlternativeLogService), m_baseAddresses);
 
+            StartService((RabbitMQBinding) binding, m_host, "LogService");
+
+            StartService(Program.GetBinding(), m_alternativeHost, "AnotherLog");
+
+            m_serviceStarted = true;
+        }
+
+        private static void StartService(RabbitMQBinding binding, ServiceHost host, string address)
+        {
+            Util.Write(ConsoleColor.Yellow, "  Binding Service...");
+
+            binding.OneWayOnly = true;
+            binding.TransactionFlow = false;
+            binding.ExactlyOnce = true;
+
+            ServiceEndpoint se = host.AddServiceEndpoint(typeof (ILogServiceContract), binding, address);
+
+            //se.Behaviors.Add(new TransactedBatchingBehavior(100));
+
+            host.Open();
+            
             Thread.Sleep(500);
             Util.WriteLine(ConsoleColor.Green, "[DONE]");
         }
@@ -110,8 +130,9 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
         public ILogServiceContract GetClient(Binding binding)
         {
             ((RabbitMQBinding)binding).OneWayOnly = true;
-            m_factory = new ChannelFactory<ILogServiceContract>(binding, "soap.amqp:///LogService");
-            //factory = new ChannelFactory<ILogServiceContract>(binding, "http://localhost/LogService");
+            ((RabbitMQBinding)binding).TransactionFlow = false;
+            m_factory = new ChannelFactory<ILogServiceContract>(binding, new EndpointAddress(m_baseAddresses));
+           
             m_factory.Open();
             return m_factory.CreateChannel();
         }

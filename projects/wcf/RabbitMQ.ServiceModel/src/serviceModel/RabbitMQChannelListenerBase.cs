@@ -55,6 +55,7 @@ namespace RabbitMQ.ServiceModel
         private CommunicationOperation m_openMethod;
         private CommunicationOperation<TChannel> m_acceptChannelMethod;
         private CommunicationOperation<bool> m_waitForChannelMethod;
+        private bool m_isTemporary;
 
         protected RabbitMQChannelListenerBase(BindingContext context)
         {
@@ -68,12 +69,18 @@ namespace RabbitMQ.ServiceModel
             if (context.ListenUriMode == ListenUriMode.Explicit && context.ListenUriBaseAddress != null)
             {
                 m_listenUri = new Uri(context.ListenUriBaseAddress, context.ListenUriRelativeAddress);
+                m_isTemporary = false;
             }
             else
             {
-                m_listenUri = new Uri(new Uri("soap.amqp:///"), Guid.NewGuid().ToString());
+                m_listenUri = new Uri(new Uri("soap.amqp://amq.direct/"), Guid.NewGuid().ToString());
+                m_isTemporary = true;
             }
+        }
 
+        public bool IsTemporary
+        {
+            get { return m_isTemporary; }
         }
 
         protected override void OnAbort()

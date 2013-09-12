@@ -51,7 +51,7 @@ namespace RabbitMQ.ServiceModel
         private BindingContext m_context;
         private CommunicationOperation m_openMethod;
         private CommunicationState m_state;
-
+        
         private RabbitMQChannelBase()
         {
             m_state = CommunicationState.Created;
@@ -81,6 +81,13 @@ namespace RabbitMQ.ServiceModel
 
         public virtual T GetProperty<T>() where T : class
         {
+            if (typeof (T) == typeof (FaultConverter))
+            {
+                RabbitMQFaultConverter faultConverter = new RabbitMQFaultConverter();
+
+                return faultConverter as T;
+            }
+
             return default(T);
         }
 
@@ -162,6 +169,25 @@ namespace RabbitMQ.ServiceModel
 
         #endregion
 
+        protected string GetExchangeName(EndpointAddress address)
+        {
+            return address.Uri.Host;
+        }
+        
+        protected string GetQueueName(EndpointAddress address)
+        {
+            return address.Uri.AbsolutePath.TrimStart('/');
+        }
+
+        protected string GetRoutingKey(EndpointAddress address)
+        {
+            if (address.Uri.IsDefaultPort)
+            {
+                return GetQueueName(address);
+            }
+
+            return address.Uri.Port.ToString();
+        }
 
         public CommunicationState State
         {
@@ -173,11 +199,6 @@ namespace RabbitMQ.ServiceModel
             get { return m_context; }
         }
 
-        protected String Exchange
-        {
-            get { return "amq.direct"; }
-        }
-
         public event EventHandler Closed;
 
         public event EventHandler Closing;
@@ -187,5 +208,22 @@ namespace RabbitMQ.ServiceModel
         public event EventHandler Opened;
 
         public event EventHandler Opening;
+    }
+
+    public class RabbitMQFaultConverter : FaultConverter
+    {
+        protected override bool OnTryCreateException(Message message, MessageFault fault, out Exception exception)
+        {
+            exception = null;
+
+            return false;
+        }
+
+        protected override bool OnTryCreateFaultMessage(Exception exception, out Message message)
+        {
+            message = null;
+
+            return false;
+        }
     }
 }

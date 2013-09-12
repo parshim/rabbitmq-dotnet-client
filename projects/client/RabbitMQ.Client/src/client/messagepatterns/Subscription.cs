@@ -47,7 +47,8 @@ using RabbitMQ.Client.Exceptions;
 using RabbitMQ.Client.Events;
 using RabbitMQ.Util;
 
-namespace RabbitMQ.Client.MessagePatterns {
+namespace RabbitMQ.Client.MessagePatterns
+{
     ///<summary>Manages a subscription to a queue or exchange.</summary>
     ///<remarks>
     ///<para>
@@ -70,11 +71,15 @@ namespace RabbitMQ.Client.MessagePatterns {
     /// called with the correct parameters.
     ///</para>
     ///</remarks>
-    public class Subscription: IEnumerable, IEnumerator, IDisposable {
+    public class Subscription : IEnumerable, IEnumerator, IDisposable
+    {
         protected IModel m_model;
 
         ///<summary>Retrieve the IModel our subscription is carried by.</summary>
-        public IModel Model { get { return m_model; } }
+        public IModel Model
+        {
+            get { return m_model; }
+        }
 
         protected string m_queueName;
         protected bool m_noAck;
@@ -84,23 +89,38 @@ namespace RabbitMQ.Client.MessagePatterns {
         protected string m_consumerTag;
 
         ///<summary>Retrieve the queue name we have subscribed to.</summary>
-        public string QueueName { get { return m_queueName; } }
+        public string QueueName
+        {
+            get { return m_queueName; }
+        }
+
         ///<summary>Retrieve the IBasicConsumer that is receiving the
         ///messages from the server for us. Normally, you will not
         ///need to access this property - use Next() and friends
         ///instead.</summary>
-        public IBasicConsumer Consumer { get { return m_consumer; } }
+        public IBasicConsumer Consumer
+        {
+            get { return m_consumer; }
+        }
+
         ///<summary>Retrieve the consumer-tag that this subscription
         ///is using. Will usually be a server-generated
         ///name.</summary>
-        public string ConsumerTag { get { return m_consumerTag; } }
+        public string ConsumerTag
+        {
+            get { return m_consumerTag; }
+        }
+
         ///<summary>Returns true if we are in "noAck" mode, where
         ///calls to Ack() will be no-ops, and where the server acks
         ///messages before they are delivered to us. Returns false if
         ///we are in a mode where calls to Ack() are required, and
         ///where such calls will actually send an acknowledgement
         ///message across the network to the server.</summary>
-        public bool NoAck { get { return m_noAck; } }
+        public bool NoAck
+        {
+            get { return m_noAck; }
+        }
 
         protected BasicDeliverEventArgs m_latestEvent;
 
@@ -109,12 +129,17 @@ namespace RabbitMQ.Client.MessagePatterns {
         ///end of the subscription has been reached, or the most
         ///recent value has already been Ack()ed. See also the
         ///documentation for Ack().</summary>
-        public BasicDeliverEventArgs LatestEvent { get { return m_latestEvent; } }
+        public BasicDeliverEventArgs LatestEvent
+        {
+            get { return m_latestEvent; }
+        }
 
         ///<summary>Creates a new Subscription in "noAck" mode,
         ///consuming from a named queue.</summary>
         public Subscription(IModel model, string queueName)
-            : this(model, queueName, true) {}
+            : this(model, queueName, true)
+        {
+        }
 
         ///<summary>Creates a new Subscription, with full control over
         ///both "noAck" mode and the name of the queue.</summary>
@@ -132,21 +157,27 @@ namespace RabbitMQ.Client.MessagePatterns {
         ///record in the server.</summary>
         public void Close()
         {
-            try {
+            try
+            {
                 bool shouldCancelConsumer = false;
 
-                lock (m_consumerLock) {
-                    if (m_consumer != null) {
+                lock (m_consumerLock)
+                {
+                    if (m_consumer != null)
+                    {
                         shouldCancelConsumer = true;
                         m_consumer = null;
                     }
                 }
 
-                if (shouldCancelConsumer) {
+                if (shouldCancelConsumer)
+                {
                     m_model.BasicCancel(m_consumerTag);
                     m_consumerTag = null;
                 }
-            } catch (OperationInterruptedException) {
+            }
+            catch (OperationInterruptedException)
+            {
                 // We don't mind, here.
             }
         }
@@ -156,7 +187,8 @@ namespace RabbitMQ.Client.MessagePatterns {
         ///null.</summary>
         public void Ack()
         {
-            if (m_latestEvent != null) {
+            if (m_latestEvent != null)
+            {
                 Ack(m_latestEvent);
             }
         }
@@ -174,15 +206,18 @@ namespace RabbitMQ.Client.MessagePatterns {
         ///</remarks>
         public void Ack(BasicDeliverEventArgs evt)
         {
-            if (evt == null) {
+            if (evt == null)
+            {
                 return;
             }
 
-            if (!m_noAck) {
+            if (!m_noAck)
+            {
                 m_model.BasicAck(evt.DeliveryTag, false);
             }
 
-            if (evt == m_latestEvent) {
+            if (evt == m_latestEvent)
+            {
                 m_latestEvent = null;
             }
         }
@@ -207,18 +242,24 @@ namespace RabbitMQ.Client.MessagePatterns {
         ///</remarks>
         public BasicDeliverEventArgs Next()
         {
-            try {
+            try
+            {
                 // Alias the pointer as otherwise it may change out
                 // from under us by the operation of Close() from
                 // another thread.
                 QueueingBasicConsumer consumer = m_consumer;
-                if (consumer == null) {
+                if (consumer == null)
+                {
                     // Closed!
                     m_latestEvent = null;
-                } else {
+                }
+                else
+                {
                     m_latestEvent = (BasicDeliverEventArgs) consumer.Queue.Dequeue();
                 }
-            } catch (EndOfStreamException) {
+            }
+            catch (EndOfStreamException)
+            {
                 m_latestEvent = null;
             }
             return m_latestEvent;
@@ -268,25 +309,31 @@ namespace RabbitMQ.Client.MessagePatterns {
         /// predictable method signature differences).
         ///</para>
         ///</remarks>
-        public bool Next(int millisecondsTimeout, out BasicDeliverEventArgs result)
+        public bool Next(TimeSpan timeout, out BasicDeliverEventArgs result)
         {
-            try {
+            try
+            {
                 // Alias the pointer as otherwise it may change out
                 // from under us by the operation of Close() from
                 // another thread.
                 QueueingBasicConsumer consumer = m_consumer;
-                if (consumer == null) {
+                if (consumer == null)
+                {
                     // Closed!
                     m_latestEvent = null;
-                } else {
-                    object qValue;
-                    if (!consumer.Queue.Dequeue(millisecondsTimeout, out qValue)) {
+                }
+                else
+                {
+                    if (!consumer.Queue.Dequeue(timeout, out result))
+                    {
                         result = null;
                         return false;
                     }
-                    m_latestEvent = (BasicDeliverEventArgs) qValue;
+                    m_latestEvent = result;
                 }
-            } catch (EndOfStreamException) {
+            }
+            catch (EndOfStreamException)
+            {
                 m_latestEvent = null;
             }
             result = m_latestEvent;
@@ -314,9 +361,12 @@ namespace RabbitMQ.Client.MessagePatterns {
         /// called explicitly on received deliveries.
         ///</para>
         ///</remarks>
-        object IEnumerator.Current {
-            get {
-                if (m_latestEvent == null) {
+        object IEnumerator.Current
+        {
+            get
+            {
+                if (m_latestEvent == null)
+                {
                     throw new InvalidOperationException();
                 }
                 return m_latestEvent;

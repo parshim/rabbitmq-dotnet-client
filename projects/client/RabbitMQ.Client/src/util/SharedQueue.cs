@@ -39,34 +39,34 @@
 //---------------------------------------------------------------------------
 
 using System;
+using System.Collections.Generic;
 using System.IO;
 using System.Collections;
 using System.Threading;
 
-namespace RabbitMQ.Util {
+namespace RabbitMQ.Util
+{
     ///<summary>A thread-safe shared queue implementation.</summary>
-    public class SharedQueue : IEnumerable {
+    public class SharedQueue<T> : IEnumerable<T>
+    {
         ///<summary>The shared queue.</summary>
         ///<remarks>
         ///Subclasses must ensure appropriate locking discipline when
-        ///accessing this field. See the implementation of Enqueue,
-        ///Dequeue.
+        ///accessing this field. See the implementation of Enqueue, Dequeue
         ///</remarks>
-        protected Queue m_queue = new Queue();
+        protected Queue<T> m_queue = new Queue<T>();
 
         ///<summary>Flag holding our current status.</summary>
         protected bool m_isOpen = true;
-
-        ///<summary>Construct a fresh, empty SharedQueue.</summary>
-        public SharedQueue() {
-        }
 
         ///<summary>Close the queue. Causes all further Enqueue()
         ///operations to throw EndOfStreamException, and all pending
         ///or subsequent Dequeue() operations to throw an
         ///EndOfStreamException once the queue is empty.</summary>
-        public void Close() {
-            lock (m_queue) {
+        public void Close()
+        {
+            lock (m_queue)
+            {
                 m_isOpen = false;
                 Monitor.PulseAll(m_queue);
             }
@@ -74,8 +74,10 @@ namespace RabbitMQ.Util {
 
         ///<summary>Call only when the lock on m_queue is held.</summary>
         /// <exception cref="EndOfStreamException" />
-        private void EnsureIsOpen() {
-            if (!m_isOpen) {
+        private void EnsureIsOpen()
+        {
+            if (!m_isOpen)
+            {
                 throw new EndOfStreamException("SharedQueue closed");
             }
         }
@@ -87,14 +89,16 @@ namespace RabbitMQ.Util {
         ///will be passed to it. If the queue is closed on entry to
         ///this method, EndOfStreamException will be thrown.
         ///</remarks>
-        public void Enqueue(object o) {
-            lock (m_queue) {
+        public void Enqueue(T o)
+        {
+            lock (m_queue)
+            {
                 EnsureIsOpen();
                 m_queue.Enqueue(o);
                 Monitor.Pulse(m_queue);
             }
         }
-    
+
         ///<summary>Retrieve the first item from the queue, or block if none available</summary>
         ///<remarks>
         ///Callers of Dequeue() will block if no items are available
@@ -102,9 +106,12 @@ namespace RabbitMQ.Util {
         ///closed. In the latter case this method will throw
         ///EndOfStreamException.
         ///</remarks>
-        public object Dequeue() {
-            lock (m_queue) {
-                while (m_queue.Count == 0) {
+        public T Dequeue()
+        {
+            lock (m_queue)
+            {
+                while (m_queue.Count == 0)
+                {
                     EnsureIsOpen();
                     Monitor.Wait(m_queue);
                 }
@@ -133,14 +140,17 @@ namespace RabbitMQ.Util {
         /// method will throw EndOfStreamException.
         ///</para>
         ///</remarks>
-        public object DequeueNoWait(object defaultValue) {
-            lock (m_queue) {
-                if (m_queue.Count == 0) {
+        public T DequeueNoWait(T defaultValue)
+        {
+            lock (m_queue)
+            {
+                if (m_queue.Count == 0)
+                {
                     EnsureIsOpen();
                     return defaultValue;
-                } else {
-                    return m_queue.Dequeue();
                 }
+                
+                return m_queue.Dequeue();
             }
         }
 
@@ -149,29 +159,29 @@ namespace RabbitMQ.Util {
         ///timeout</summary>
         ///<remarks>
         ///<para>
-	/// If one or more items are present on the queue at the time
-	/// the call is made, the call will return
-	/// immediately. Otherwise, the calling thread blocks until
-	/// either an item appears on the queue, or
-	/// millisecondsTimeout milliseconds have elapsed.
+        /// If one or more items are present on the queue at the time
+        /// the call is made, the call will return
+        /// immediately. Otherwise, the calling thread blocks until
+        /// either an item appears on the queue, or
+        /// timeout milliseconds have elapsed.
         ///</para>
         ///<para>
-	/// Returns true in the case that an item was available before
-	/// the timeout, in which case the out parameter "result" is
-	/// set to the item itself.
+        /// Returns true in the case that an item was available before
+        /// the timeout, in which case the out parameter "result" is
+        /// set to the item itself.
         ///</para>
         ///<para>
-	/// If no items were available before the timeout, returns
-	/// false, and sets "result" to null.
+        /// If no items were available before the timeout, returns
+        /// false, and sets "result" to null.
         ///</para>
         ///<para>
-	/// A timeout of -1 (i.e. System.Threading.Timeout.Infinite)
-	/// will be interpreted as a command to wait for an
-	/// indefinitely long period of time for an item to become
-	/// available. Usage of such a timeout is equivalent to
-	/// calling Dequeue() with no arguments. See also the MSDN
-	/// documentation for
-	/// System.Threading.Monitor.Wait(object,int).
+        /// A timeout of -1 (i.e. System.Threading.Timeout.Infinite)
+        /// will be interpreted as a command to wait for an
+        /// indefinitely long period of time for an item to become
+        /// available. Usage of such a timeout is equivalent to
+        /// calling Dequeue() with no arguments. See also the MSDN
+        /// documentation for
+        /// System.Threading.Monitor.Wait(object,int).
         ///</para>
         ///<para>
         /// If no items are present and the queue is in a closed
@@ -180,68 +190,112 @@ namespace RabbitMQ.Util {
         /// method will throw EndOfStreamException.
         ///</para>
         ///</remarks>
-	public bool Dequeue(int millisecondsTimeout, out object result) {
-	    if (millisecondsTimeout == Timeout.Infinite) {
-		result = Dequeue();
-		return true;
-	    }
+        public bool Dequeue(TimeSpan timeout, out T result)
+        {
+            if (timeout == TimeSpan.MaxValue)
+            {
+                result = Dequeue();
+                return true;
+            }
 
-	    DateTime startTime = DateTime.Now;
-	    lock (m_queue) {
-                while (m_queue.Count == 0) {
-                    EnsureIsOpen();
-		    int elapsedTime = (int) ((DateTime.Now - startTime).TotalMilliseconds);
-		    int remainingTime = millisecondsTimeout - elapsedTime;
-		    if (remainingTime <= 0) {
-			result = null;
-			return false;
-		    }
-
-                    Monitor.Wait(m_queue, remainingTime);
+            lock (m_queue)
+            {
+                if (WaitForMessage(timeout))
+                {
+                    result = m_queue.Dequeue();
+                    return true;
                 }
 
-                result = m_queue.Dequeue();
-		return true;
+                result = default(T);
+                return false;
             }
-	}
+        }
+
+        /// <summary>
+        /// Waits till queue will receive any message. Blocks calling thread till queue have at least one message or till timeout.
+        /// </summary>
+        /// <param name="timeout"></param>
+        /// <returns>True if queue have at least one message at method call or till timeout any message enquired</returns>
+        public bool WaitForMessage(TimeSpan timeout)
+        {
+            DateTime startTime = DateTime.Now;
+            lock (m_queue)
+            {
+                while (m_queue.Count == 0)
+                {
+                    if (!m_isOpen)
+                    {
+                        return false;
+                    }
+
+                    TimeSpan elapsedTime = DateTime.Now - startTime;
+                    TimeSpan remainingTime = timeout.Subtract(elapsedTime);
+                    if (remainingTime <= TimeSpan.Zero)
+                    {
+                        return false;
+                    }
+
+                    if (remainingTime.TotalMilliseconds > Int32.MaxValue)
+                    {
+                        Monitor.Wait(m_queue);
+                    }
+                    else
+                    {
+                        Monitor.Wait(m_queue, remainingTime);
+                    }
+                }
+
+                return true;
+            }
+        }
+
+        public IEnumerator<T> GetEnumerator()
+        {
+            return new SharedQueueEnumerator<T>(this);
+        }
 
         ///<summary>Implementation of the IEnumerable interface, for
         ///permitting SharedQueue to be used in foreach
         ///loops.</summary>
-        IEnumerator IEnumerable.GetEnumerator() {
-            return new SharedQueueEnumerator(this);
+        IEnumerator IEnumerable.GetEnumerator()
+        {
+            return GetEnumerator();
         }
 
     }
 
     ///<summary>Implementation of the IEnumerator interface, for
     ///permitting SharedQueue to be used in foreach loops.</summary>
-    public class SharedQueueEnumerator : IEnumerator {
-
-        protected SharedQueue m_queue;
-        protected object m_current;
+    public class SharedQueueEnumerator<T> : IEnumerator<T>
+    {
+        protected SharedQueue<T> m_queue;
+        protected T m_current;
 
         ///<summary>Construct an enumerator for the given
         ///SharedQueue.</summary>
-        public SharedQueueEnumerator(SharedQueue queue) {
+        public SharedQueueEnumerator(SharedQueue<T> queue)
+        {
             m_queue = queue;
         }
 
-        object IEnumerator.Current {
-            get {
-                if (m_current == null) {
-                    throw new InvalidOperationException();
-                }
-                return m_current;
+        object IEnumerator.Current
+        {
+            get
+            {
+                return Current;
             }
         }
 
-        bool IEnumerator.MoveNext() {
-            try {
+        bool IEnumerator.MoveNext()
+        {
+            try
+            {
                 m_current = m_queue.Dequeue();
                 return true;
-            } catch (EndOfStreamException) {
-                m_current = null;
+            }
+            catch (EndOfStreamException)
+            {
+                m_current = default(T);
                 return false;
             }
         }
@@ -249,10 +303,27 @@ namespace RabbitMQ.Util {
         ///<summary>Reset()ting a SharedQueue doesn't make sense, so
         ///this method always throws
         ///InvalidOperationException.</summary>
-        void IEnumerator.Reset() {
+        void IEnumerator.Reset()
+        {
             throw new InvalidOperationException("SharedQueue.Reset() does not make sense");
         }
 
+        public T Current
+        {
+            get
+            {
+                if (Equals(m_current, default(T)))
+                {
+                    throw new InvalidOperationException();
+                }
+                return m_current;
+            }
+        }
+
+        public void Dispose()
+        {
+            
+        }
     }
 
 }

@@ -47,8 +47,6 @@ namespace RabbitMQ.ServiceModel
 
     internal abstract class RabbitMQOutputChannelBase : RabbitMQChannelBase, IOutputChannel
     {
-        
-        
         private SendOperation m_sendMethod;
         private EndpointAddress m_address;
 

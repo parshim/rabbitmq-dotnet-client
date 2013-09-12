@@ -382,17 +382,20 @@ namespace RabbitMQ.Client.MessagePatterns {
         protected virtual BasicDeliverEventArgs RetrieveReply(string correlationId)
         {
             BasicDeliverEventArgs reply;
-	    if (!m_subscription.Next(m_timeout, out reply)) {
-		OnTimedOut();
-		return null;
-	    }
+            if (!m_subscription.Next(TimeSpan.FromMilliseconds(m_timeout), out reply))
+            {
+                OnTimedOut();
+                return null;
+            }
 
-	    if (reply == null) {
-		OnDisconnected();
-		return null;
-	    }
+            if (reply == null)
+            {
+                OnDisconnected();
+                return null;
+            }
 
-            if (reply.BasicProperties.CorrelationId != correlationId) {
+            if (reply.BasicProperties.CorrelationId != correlationId)
+            {
                 throw new ProtocolViolationException
                     (string.Format("Wrong CorrelationId in reply; expected {0}, got {1}",
                                    correlationId,

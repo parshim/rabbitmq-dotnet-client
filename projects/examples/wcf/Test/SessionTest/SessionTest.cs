@@ -54,7 +54,7 @@ namespace RabbitMQ.ServiceModel.Test.SessionTest
         public void StartService(Binding binding)
         {
             Util.Write(ConsoleColor.Yellow, "  Binding Service...");
-            m_service = new ServiceHost(typeof(Cart), new Uri("soap.amqp:///"));
+            m_service = new ServiceHost(typeof(Cart), new Uri("soap.amqp://amq.direct/"));
             m_service.AddServiceEndpoint(typeof(ICart), binding, "Cart");
             m_service.Open();
 
@@ -71,7 +71,7 @@ namespace RabbitMQ.ServiceModel.Test.SessionTest
 
         public ICart GetClient(Binding binding)
         {
-            m_factory = new ChannelFactory<ICart>(binding, "soap.amqp:///Cart");
+            m_factory = new ChannelFactory<ICart>(binding, "soap.amqp://amq.direct/Cart");
             m_factory.Open();
             return m_factory.CreateChannel();
         }
