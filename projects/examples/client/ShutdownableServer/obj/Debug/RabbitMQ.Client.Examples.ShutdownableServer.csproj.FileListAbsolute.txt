@@ -1,7 +1,0 @@
-C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\ShutdownableServer\build\bin\ShutdownableServer.exe
-C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\ShutdownableServer\build\bin\ShutdownableServer.pdb
-C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\ShutdownableServer\build\bin\RabbitMQ.Client.dll
-C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\ShutdownableServer\build\bin\RabbitMQ.Client.pdb
-C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\ShutdownableServer\build\bin\RabbitMQ.Client.xml
-C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\ShutdownableServer\obj\Debug\ShutdownableServer.exe
-C:\Users\Michael\Documents\GitHub\rabbitmq-dotnet-client\projects\examples\client\ShutdownableServer\obj\Debug\ShutdownableServer.pdb
