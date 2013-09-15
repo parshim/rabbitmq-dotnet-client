@@ -36,7 +36,7 @@ namespace RabbitMQ.Client
         {
             bool dequeue = base.Dequeue(timeout, out message);
 
-            if (dequeue)
+            if (dequeue && Transaction.Current != null)
             {
                 Transaction.Current.EnlistVolatile(new TransactionalQueueConsumerEnslistment(message.DeliveryTag, Model), EnlistmentOptions.None);
             }
@@ -48,7 +48,7 @@ namespace RabbitMQ.Client
         {
             BasicDeliverEventArgs message = base.DequeueNoWait();
 
-            if (message != null)
+            if (message != null && Transaction.Current != null)
             {
                 Transaction.Current.EnlistVolatile(new TransactionalQueueConsumerEnslistment(message.DeliveryTag, Model), EnlistmentOptions.None);
             }

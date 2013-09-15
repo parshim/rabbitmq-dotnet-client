@@ -73,11 +73,11 @@ namespace RabbitMQ.ServiceModel.Test
 
             int passed = 0, failed = 0;
             List<ITestCase> tests = new List<ITestCase>();
-            tests.Add(new OneWayTest.OneWayTest());
+            //tests.Add(new OneWayTest.OneWayTest());
             tests.Add(new TwoWayTest.TwoWayTest());
-            tests.Add(new SessionTest.SessionTest());
-            tests.Add(new DuplexTest.DuplexTest());
-            tests.Add(new FaultTest.FaultTest());
+            //tests.Add(new SessionTest.SessionTest());
+            //tests.Add(new DuplexTest.DuplexTest());
+            //tests.Add(new FaultTest.FaultTest());
             Banner();
             
             DateTime started = DateTime.Now;

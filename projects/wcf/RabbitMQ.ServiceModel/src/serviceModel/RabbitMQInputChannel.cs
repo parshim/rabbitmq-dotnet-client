@@ -93,7 +93,6 @@ namespace RabbitMQ.ServiceModel
 #endif
                 Message message = m_encoder.ReadMessage(new MemoryStream(result.Body), (int)m_bindingElement.MaxReceivedMessageSize);
                 message.Headers.To = LocalAddress.Uri;
-
 #if VERBOSE
                 DebugHelper.Stop(" #### Message.Receive {{\n\tAction={2}, \n\tBytes={1}, \n\tTime={0}ms}}.",
                         msg.Body.Length,
@@ -125,7 +124,6 @@ namespace RabbitMQ.ServiceModel
 
         public override void Close(TimeSpan timeout)
         {
-
             if (State == CommunicationState.Closed || State == CommunicationState.Closing)
             {
                 return; // Ignore the call, we're already closing.
@@ -185,13 +183,15 @@ namespace RabbitMQ.ServiceModel
             }
             else
             {
-                queueingBasicConsumer = new QueueingAutoAckConsumer(m_model);
+                queueingBasicConsumer = new QueueingBasicConsumer(m_model);
             }
 
             m_messageQueue = queueingBasicConsumer;
 
             //Listen to the queue
-            m_model.BasicConsume(queue, false, queueingBasicConsumer);
+            bool noAck = !m_bindingElement.TransactedReceiveEnabled;
+
+            m_model.BasicConsume(queue, noAck, queueingBasicConsumer);
 
 #if VERBOSE
             DebugHelper.Stop(" ## In.Channel.Open {{\n\tAddress={1}, \n\tTime={0}ms}}.", LocalAddress.Uri.PathAndQuery);
