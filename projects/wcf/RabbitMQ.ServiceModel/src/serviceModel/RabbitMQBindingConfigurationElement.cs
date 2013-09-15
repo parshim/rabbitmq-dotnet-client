@@ -81,16 +81,15 @@ namespace RabbitMQ.ServiceModel
             RabbitMQBinding rabbind = binding as RabbitMQBinding;
             if (rabbind != null)
             {
-                this.HostName = rabbind.HostName;
-                this.Port = rabbind.Port;
                 this.MaxMessageSize = rabbind.MaxMessageSize;
                 this.OneWayOnly = rabbind.OneWayOnly;
                 this.TransactionFlowEnabled = rabbind.TransactionFlow;
                 this.ExactlyOnce = rabbind.ExactlyOnce;
                 this.TTL = rabbind.TTL;
-                this.VirtualHost = rabbind.Transport.ConnectionFactory.VirtualHost;
-                this.Username = rabbind.Transport.ConnectionFactory.UserName;
-                this.Password = rabbind.Transport.ConnectionFactory.Password;
+                this.RoutingKey = rabbind.RoutingKey;
+                this.VirtualHost = rabbind.Transport.VirtualHost;
+                this.Username = rabbind.Transport.Username;
+                this.Password = rabbind.Transport.Password;
             }
         }
 
@@ -108,8 +107,7 @@ namespace RabbitMQ.ServiceModel
                         binding.GetType().AssemblyQualifiedName));
             }
 
-            rabbind.HostName = this.HostName;
-            rabbind.Port = this.Port;
+            rabbind.RoutingKey = this.RoutingKey;
             rabbind.BrokerProtocol = this.Protocol;
             rabbind.OneWayOnly = this.OneWayOnly;
             rabbind.TransactionFlow = this.TransactionFlowEnabled;
@@ -134,21 +132,11 @@ namespace RabbitMQ.ServiceModel
         /// <summary>
         /// Specifies the hostname of the broker that the binding should connect to.
         /// </summary>
-        [ConfigurationProperty("hostname", IsRequired = true)]
-        public String HostName
+        [ConfigurationProperty("routingKey", IsRequired = false)]
+        public String RoutingKey
         {
-            get { return ((String)base["hostname"]); }
-            set { base["hostname"] = value; }
-        }
-
-        /// <summary>
-        /// Specifies the port of the broker that the binding should connect to.
-        /// </summary>
-        [ConfigurationProperty("port", DefaultValue = AmqpTcpEndpoint.UseDefaultPort)]
-        public int Port
-        {
-            get { return ((int)base["port"]); }
-            set { base["port"] = value; }
+            get { return ((String)base["routingKey"]); }
+            set { base["routingKey"] = value; }
         }
         
         /// <summary>

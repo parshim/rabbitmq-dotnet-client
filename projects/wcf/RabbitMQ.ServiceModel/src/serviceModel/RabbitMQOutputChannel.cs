@@ -50,11 +50,11 @@ namespace RabbitMQ.ServiceModel
 
     internal sealed class RabbitMQOutputChannel : RabbitMQOutputChannelBase
     {
-        private RabbitMQTransportBindingElement m_bindingElement;
+        private readonly RabbitMQTransportBindingElement m_bindingElement;
         private readonly MessageEncoder m_encoder;
-        private readonly IModel m_model;
+        private IModel m_model;
 
-        public RabbitMQOutputChannel(BindingContext context, IModel model, EndpointAddress address)
+        public RabbitMQOutputChannel(BindingContext context, EndpointAddress address)
             : base(context, address)
         {
             //m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
@@ -64,45 +64,58 @@ namespace RabbitMQ.ServiceModel
             }
 
             m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
-
-            m_model = model;
         }
 
         public override void Send(Message message, TimeSpan timeout)
         {
             if (message.State != MessageState.Closed)
             {
-                byte[] body;
+                
 #if VERBOSE
                 DebugHelper.Start();
 #endif
-                using (MemoryStream str = new MemoryStream())
-                {
-                    m_encoder.WriteMessage(message, str);
-                    body = str.ToArray();
-                }
-#if VERBOSE
-                DebugHelper.Stop(" #### Message.Send {{\n\tAction={2}, \n\tBytes={1}, \n\tTime={0}ms}}.",
-                    body.Length,
-                    message.Headers.Action.Remove(0, message.Headers.Action.LastIndexOf('/')));
-#endif
+                byte[] body;
+
+                
                 string exchange = GetExchangeName(RemoteAddress);
-                string routingKey = GetRoutingKey(RemoteAddress);
+
+                string routingKey = m_bindingElement.RoutingKey;
 
                 IBasicProperties basicProperties = m_model.CreateBasicProperties();
-                
+
+                basicProperties.Timestamp = new AmqpTimestamp(DateTime.Now);
+                basicProperties.ContentType = "SOAP";
+
+                // TODO: read custom headers and put it into the message properties
+                //foreach (MessageHeaderInfo messageHeaderInfo in message.Headers)
+                //{
+                //    basicProperties.Headers.Add(messageHeaderInfo.Name, "");
+                //}
+
                 // TODO: move message persistency to transport configuration
                 //basicProperties.SetPersistent(false);
-                
+
                 if (!string.IsNullOrEmpty(m_bindingElement.TTL))
                 {
                     basicProperties.Expiration = m_bindingElement.TTL;
                 }
 
+                using (MemoryStream str = new MemoryStream())
+                {
+                    m_encoder.WriteMessage(message, str);
+                    body = str.ToArray();
+                }
+
                 m_model.BasicPublish(exchange,
-                                   routingKey,
-                                   basicProperties,
-                                   body);
+                                     routingKey,
+                                     basicProperties,
+                                     body);
+
+#if VERBOSE
+                DebugHelper.Stop(" #### Message.Send {{\n\tAction={2}, \n\tBytes={1}, \n\tTime={0}ms}}.",
+                    body.Length,
+                    message.Headers.Action.Remove(0, message.Headers.Action.LastIndexOf('/')));
+#endif
             }
         }
 
@@ -112,6 +125,20 @@ namespace RabbitMQ.ServiceModel
                 return; // Ignore the call, we're already closing.
 
             OnClosing();
+
+#if VERBOSE
+            DebugHelper.Start();
+#endif
+
+            if (m_model != null)
+            {
+                ConnectionManager.Instance.CloseModel(m_model, timeout);
+                m_model = null;
+            }
+
+#if VERBOSE
+            DebugHelper.Stop(" ## Out.Close {{Time={0}ms}}.");
+#endif
             OnClosed();
         }
 
@@ -121,7 +148,13 @@ namespace RabbitMQ.ServiceModel
                 throw new InvalidOperationException(string.Format("Cannot open the channel from the {0} state.", State));
 
             OnOpening();
-
+#if VERBOSE
+            DebugHelper.Start();
+#endif
+            m_model = ConnectionManager.Instance.OpenModel(RemoteAddress, m_bindingElement, timeout);
+#if VERBOSE
+            DebugHelper.Stop(" ## Out.Open {{Time={0}ms}}.");
+#endif
             OnOpened();
         }
     }

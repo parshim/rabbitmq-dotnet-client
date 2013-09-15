@@ -53,7 +53,7 @@ namespace RabbitMQ.ServiceModel.Test.FaultTest
         public void StartService(Binding binding)
         {
             Util.Write(ConsoleColor.Yellow, "  Binding Service...");
-            m_service = new ServiceHost(typeof(ExplodingService), new Uri("soap.amqp://amq.direct/"));
+            m_service = new ServiceHost(typeof(ExplodingService), new Uri("amqp://localhost"));
             m_service.AddServiceEndpoint(typeof(IExplode), binding, "FaultTest");
             m_service.Open();
 
@@ -70,7 +70,7 @@ namespace RabbitMQ.ServiceModel.Test.FaultTest
 
         public IExplode GetClient(Binding binding)
         {
-            m_client = new ExplodingClient(binding, new EndpointAddress("soap.amqp://amq.direct/FaultTest"));
+            m_client = new ExplodingClient(binding, new EndpointAddress("amqp://localhost/"));
             m_client.Open();
 
             return m_client;

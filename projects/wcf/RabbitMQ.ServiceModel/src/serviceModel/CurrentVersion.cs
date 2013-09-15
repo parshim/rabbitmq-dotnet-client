@@ -55,7 +55,7 @@ namespace RabbitMQ.ServiceModel
     /// </summary>
     public static class CurrentVersion
     {
-        internal const String Scheme = "soap.amqp";
+        internal const String Scheme = "amqp";
         
         internal static Encoding DefaultEncoding { get { return Encoding.UTF8; } }
 

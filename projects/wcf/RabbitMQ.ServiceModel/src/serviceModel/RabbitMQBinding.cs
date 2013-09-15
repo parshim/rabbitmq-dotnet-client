@@ -43,26 +43,20 @@
 namespace RabbitMQ.ServiceModel
 {
     using System;
-    using System.Configuration;
     using System.ServiceModel;
     using System.ServiceModel.Channels;
 
-    using RabbitMQ.Client;
+    using Client;
 
     /// <summary>
     /// A windows communication foundation binding over AMQP
     /// </summary>
     public sealed class RabbitMQBinding : Binding
     {
-        private String m_host;
-        private int m_port;
         private long m_maxMessageSize;
-        private IProtocol m_brokerProtocol;
         private CompositeDuplexBindingElement m_compositeDuplex;
         private TextMessageEncodingBindingElement m_encoding;
         private bool m_isInitialized;
-        private bool m_oneWayOnly;
-        private bool m_exactlyOnce;
         private ReliableSessionBindingElement m_session;
         private TransactionFlowBindingElement m_transactionFlow;
         private bool m_transactionsEnabled;
@@ -78,47 +72,19 @@ namespace RabbitMQ.ServiceModel
         public RabbitMQBinding()
             : this(Protocols.DefaultProtocol)
         { }
-
-        /// <summary>
-        /// Uses the broker specified by the given hostname and port with
-        /// Protocols.DefaultProtocol.
-        /// </summary>
-        /// <param name="hostname">The hostname of the broker to connect to</param>
-        /// <param name="port">The port of the broker to connect to</param>
-        public RabbitMQBinding(String hostname, int port)
-            : this(hostname, port, Protocols.DefaultProtocol)
-        { }
-
-        /// <summary>
-        /// Uses the broker and protocol specified
-        /// </summary>
-        /// <param name="hostname">The hostname of the broker to connect to</param>
-        /// <param name="port">The port of the broker to connect to</param>
-        /// <param name="protocol">The protocol version to use</param>
-        public RabbitMQBinding(String hostname, int port, IProtocol protocol)
-            : this(protocol)
-        {
-            this.HostName = hostname;
-            this.Port = port;
-        }
-
+        
         /// <summary>
         /// Uses the broker, login and protocol specified
         /// </summary>
-        /// <param name="hostname">The hostname of the broker to connect to</param>
-        /// <param name="port">The port of the broker to connect to</param>
         /// <param name="username">The broker username to connect with</param>
         /// <param name="password">The broker password to connect with</param>
         /// <param name="virtualhost">The broker virtual host</param>
         /// <param name="maxMessageSize">The largest allowable encoded message size</param>
         /// <param name="protocol">The protocol version to use</param>
-        public RabbitMQBinding(String hostname, int port,                               
-                               String username, String password,  String virtualhost,
+        public RabbitMQBinding(String username, String password,  String virtualhost,
                                long maxMessageSize, IProtocol protocol)
             : this(protocol)
         {
-            this.HostName = hostname;
-            this.Port = port;
             this.Transport.Username = username;
             this.Transport.Password = password;
             this.Transport.VirtualHost = virtualhost;
@@ -132,7 +98,7 @@ namespace RabbitMQ.ServiceModel
         /// <param name="protocol">The protocol version to use</param>
         public RabbitMQBinding(IProtocol protocol)
         {
-            m_brokerProtocol = protocol;
+            BrokerProtocol = protocol;
             base.Name = "RabbitMQBinding";
             base.Namespace = "http://schemas.rabbitmq.com/2007/RabbitMQ/";
 
@@ -143,11 +109,10 @@ namespace RabbitMQ.ServiceModel
 
         public override BindingElementCollection CreateBindingElements()
         {
-            m_transport.HostName = this.HostName;
-            m_transport.Port = this.Port;
             m_transport.BrokerProtocol = this.BrokerProtocol;
             m_transport.TransactedReceiveEnabled = this.ExactlyOnce;
             m_transport.TTL = this.TTL;
+            m_transport.RoutingKey = this.RoutingKey;
             if (MaxMessageSize != DefaultMaxMessageSize)
             {
                 m_transport.MaxReceivedMessageSize = MaxMessageSize;
@@ -168,7 +133,7 @@ namespace RabbitMQ.ServiceModel
 
             return elements;
         }
-
+        
         private void Initialize()
         {
             lock (this)
@@ -187,7 +152,7 @@ namespace RabbitMQ.ServiceModel
         }
 
         /// <summary>
-        /// Gets the scheme used by the binding, soap.amqp
+        /// Gets the scheme used by the binding
         /// </summary>
         public override string Scheme
         {
@@ -195,29 +160,8 @@ namespace RabbitMQ.ServiceModel
         }
 
         /// <summary>
-        /// Specifies the hostname of the RabbitMQ Server
-        /// </summary>
-        [ConfigurationProperty("hostname")]
-        public String HostName
-        {
-            get { return m_host; }
-            set { m_host = value; }
-        }
-
-        /// <summary>
-        /// Specifies the RabbitMQ Server port
-        /// </summary>
-        [ConfigurationProperty("port")]
-        public int Port
-        {
-            get { return m_port; }
-            set { m_port = value; }
-        }
-
-        /// <summary>
         /// Specifies the maximum encoded message size
         /// </summary>
-        [ConfigurationProperty("maxmessagesize")]
         public long MaxMessageSize
         {
             get { return m_maxMessageSize; }
@@ -227,11 +171,7 @@ namespace RabbitMQ.ServiceModel
         /// <summary>
         /// Specifies the version of the AMQP protocol that should be used to communicate with the broker
         /// </summary>
-        public IProtocol BrokerProtocol
-        {
-            get { return m_brokerProtocol; }
-            set { m_brokerProtocol = value; }
-        }
+        public IProtocol BrokerProtocol { get; set; }
 
         /// <summary>
         /// Gets the AMQP transport binding element
@@ -263,23 +203,21 @@ namespace RabbitMQ.ServiceModel
         /// Specifies whether or not the CompositeDuplex and ReliableSession
         /// binding elements are added to the channel stack.
         /// </summary>
-        public bool OneWayOnly
-        {
-            get { return m_oneWayOnly; }
-            set { m_oneWayOnly = value; }
-        }
+        public bool OneWayOnly { get; set; }
+
+        /// <summary>
+        /// Message routing key
+        /// </summary>
+        public string RoutingKey { get; set; }
 
         /// <summary>
         /// Enables transactional message delivery
         /// </summary>
-        [ConfigurationProperty("exactlyOnce")]
-        public bool ExactlyOnce
-        {
-            get { return m_exactlyOnce; }
-            set { m_exactlyOnce = value; }
-        }
+        public bool ExactlyOnce { get; set; }
 
-        [ConfigurationProperty("TTL")]
+        /// <summary>
+        /// Message time to live
+        /// </summary>
         public string TTL { get; set; }
     }
 }

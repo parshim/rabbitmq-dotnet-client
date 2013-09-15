@@ -44,14 +44,10 @@ namespace RabbitMQ.ServiceModel
     using System;
     using System.ServiceModel;
     using System.ServiceModel.Channels;
-    using System.Threading;
-
-    using RabbitMQ.Client;
-    using System.Diagnostics;
+    using Client;
 
     internal sealed class RabbitMQChannelListener : RabbitMQChannelListenerBase<IInputChannel>
     {
-
         private IInputChannel m_channel;
         private IModel m_model;
 
@@ -69,8 +65,8 @@ namespace RabbitMQ.ServiceModel
             if (m_channel != null)
                 return null;
 
-            m_channel = new RabbitMQInputChannel(Context, m_model, new EndpointAddress(Uri.ToString()), IsTemporary);
-            m_channel.Closed += new EventHandler(ListenChannelClosed);
+            m_channel = new RabbitMQInputChannel(Context, new EndpointAddress(Uri.ToString()));
+            m_channel.Closed += ListenChannelClosed;
             return m_channel;
         }
         
@@ -81,14 +77,6 @@ namespace RabbitMQ.ServiceModel
 
         protected override void OnOpen(TimeSpan timeout)
         {
-
-#if VERBOSE
-            DebugHelper.Start();
-#endif            
-            m_model = m_bindingElement.Open(timeout);
-#if VERBOSE
-            DebugHelper.Stop(" ## In.Open {{Time={0}ms}}.");
-#endif
         }
 
         protected override void OnClose(TimeSpan timeout)
@@ -101,12 +89,6 @@ namespace RabbitMQ.ServiceModel
                 m_channel.Close();
                 m_channel = null;
             }
-
-            if (m_model != null)
-            {
-                m_bindingElement.Close(m_model, timeout);
-                m_model = null;
-            }
 #if VERBOSE
             DebugHelper.Stop(" ## In.Close {{Time={0}ms}}.");
 #endif
@@ -114,6 +96,8 @@ namespace RabbitMQ.ServiceModel
 
         private void ListenChannelClosed(object sender, EventArgs args)
         {
+            ((IInputChannel)sender).Closed -= ListenChannelClosed;
+
             Close();
         }
 }

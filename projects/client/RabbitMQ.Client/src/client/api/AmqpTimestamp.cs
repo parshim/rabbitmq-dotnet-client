@@ -70,6 +70,10 @@ namespace RabbitMQ.Client
         {
             m_unixTime = unixTime;
         }
+        
+        public AmqpTimestamp(DateTime dateTime):this(Convert.ToInt64((dateTime.Subtract(new DateTime(1970, 1, 1, 0, 0, 0))).TotalSeconds))
+        {
+        }
 
         ///<summary>Retrieve the time_t from this structure.</summary>
         public long UnixTime

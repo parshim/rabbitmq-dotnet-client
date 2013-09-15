@@ -65,12 +65,12 @@ namespace RabbitMQ.ServiceModel
                         bindingElement.GetType().AssemblyQualifiedName));
             }
 
-            rabbind.HostName = this.HostName;
-            rabbind.Port = this.Port;
+            rabbind.RoutingKey = this.RoutingKey;
+            rabbind.TTL = this.TTL;
             rabbind.BrokerProtocol = this.Protocol;
-            rabbind.ConnectionFactory.Password = this.Password;
-            rabbind.ConnectionFactory.UserName = this.Username;
-            rabbind.ConnectionFactory.VirtualHost = this.VirtualHost;
+            rabbind.Password = this.Password;
+            rabbind.Username = this.Username;
+            rabbind.VirtualHost = this.VirtualHost;
             rabbind.TransactedReceiveEnabled = this.ExactlyOnce;
         }
 
@@ -80,8 +80,8 @@ namespace RabbitMQ.ServiceModel
             RabbitMQTransportElement element = from as RabbitMQTransportElement;
             if (element != null)
             {
-                this.HostName = element.HostName;
-                this.Port = element.Port;
+                this.RoutingKey = element.RoutingKey;
+                this.TTL = element.TTL;
                 this.ProtocolVersion = element.ProtocolVersion;
                 this.Password = element.Password;
                 this.Username = element.Username;
@@ -118,12 +118,13 @@ namespace RabbitMQ.ServiceModel
                         bindingElement.GetType().AssemblyQualifiedName));
             }
 
-            this.HostName = rabbind.HostName;
-            this.Port = rabbind.Port;
+            this.RoutingKey = rabbind.RoutingKey;
+            this.TTL = rabbind.TTL;
             this.ProtocolVersion = rabbind.BrokerProtocol.ApiName;
-            this.Password = rabbind.ConnectionFactory.Password;
-            this.Username = rabbind.ConnectionFactory.UserName;
-            this.VirtualHost = rabbind.ConnectionFactory.VirtualHost;
+            this.Password = rabbind.Password;
+            this.Username = rabbind.Username;
+            this.VirtualHost = rabbind.VirtualHost;
+            
         }
 
         public override System.Type BindingElementType
@@ -134,21 +135,21 @@ namespace RabbitMQ.ServiceModel
         /// <summary>
         /// Specifies the hostname of the broker that the binding should connect to.
         /// </summary>
-        [ConfigurationProperty("hostname", IsRequired = true)]
-        public String HostName
+        [ConfigurationProperty("routingKey", IsRequired = true)]
+        public string RoutingKey
         {
-            get { return ((String)base["hostname"]); }
-            set { base["hostname"] = value; }
+            get { return ((string)base["routingKey"]); }
+            set { base["routingKey"] = value; }
         }
 
         /// <summary>
         /// Specifies the port of the broker that the binding should connect to.
         /// </summary>
-        [ConfigurationProperty("port", DefaultValue = AmqpTcpEndpoint.UseDefaultPort)]
-        public int Port
+        [ConfigurationProperty("TTL", DefaultValue = "")]
+        public string TTL
         {
-            get { return ((int)base["port"]); }
-            set { base["port"] = value; }
+            get { return ((string)base["TTL"]); }
+            set { base["TTL"] = value; }
         }
 
         /// <summary>

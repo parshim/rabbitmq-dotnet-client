@@ -171,24 +171,14 @@ namespace RabbitMQ.ServiceModel
 
         protected string GetExchangeName(EndpointAddress address)
         {
-            return address.Uri.Host;
+            return address.Uri.AbsolutePath.TrimStart('/');
         }
         
         protected string GetQueueName(EndpointAddress address)
         {
             return address.Uri.AbsolutePath.TrimStart('/');
         }
-
-        protected string GetRoutingKey(EndpointAddress address)
-        {
-            if (address.Uri.IsDefaultPort)
-            {
-                return GetQueueName(address);
-            }
-
-            return address.Uri.Port.ToString();
-        }
-
+        
         public CommunicationState State
         {
             get { return m_state; }

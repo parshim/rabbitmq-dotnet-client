@@ -61,19 +61,18 @@ namespace RabbitMQ.ServiceModel
     {
         private readonly RabbitMQTransportBindingElement m_bindingElement;
         private readonly MessageEncoder m_encoder;
-        private readonly IModel m_model;
-        private IMessageQueue m_messageQueue;
-        private readonly bool m_isTemporary;
         
-        public RabbitMQInputChannel(BindingContext context, IModel model, EndpointAddress address, bool isTemporary)
+        private IModel m_model;
+        private IMessageQueue m_messageQueue;
+        
+        public RabbitMQInputChannel(BindingContext context, EndpointAddress address)
             : base(context, address)
         {
             m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
             TextMessageEncodingBindingElement encoderElem = context.BindingParameters.Find<TextMessageEncodingBindingElement>();
             encoderElem.ReaderQuotas.MaxStringContentLength = (int)m_bindingElement.MaxReceivedMessageSize;
             m_encoder = encoderElem.CreateMessageEncoderFactory().Encoder;
-            m_model = model;
-            m_isTemporary = isTemporary;
+            
             m_messageQueue = null;
         }
 
@@ -133,7 +132,14 @@ namespace RabbitMQ.ServiceModel
 #if VERBOSE
             DebugHelper.Start();
 #endif
-            m_model.BasicCancel(m_messageQueue.ConsumerTag);
+            if (m_model != null)
+            {
+                m_model.BasicCancel(m_messageQueue.ConsumerTag);
+
+                ConnectionManager.Instance.CloseModel(m_model, timeout);
+                
+                m_model = null;
+            }
 
 #if VERBOSE
             DebugHelper.Stop(" ## In.Channel.Close {{\n\tAddress={1}, \n\tTime={0}ms}}.", LocalAddress.Uri.PathAndQuery);
@@ -144,35 +150,27 @@ namespace RabbitMQ.ServiceModel
         public override void Open(TimeSpan timeout)
         {
             if (State != CommunicationState.Created && State != CommunicationState.Closed)
-                throw new InvalidOperationException(string.Format("Cannot open the channel from the {0} state.", base.State));
+                throw new InvalidOperationException(string.Format("Cannot open the channel from the {0} state.",
+                                                                  base.State));
 
             OnOpening();
 #if VERBOSE
             DebugHelper.Start();
 #endif
-            string exchange = GetExchangeName(LocalAddress);
+            m_model = ConnectionManager.Instance.OpenModel(LocalAddress, m_bindingElement, timeout);
+
             string queue = GetQueueName(LocalAddress);
-            string routingKey = GetRoutingKey(LocalAddress);
 
-            if (m_isTemporary)
+            IDictionary args = new Dictionary<String, Object>();
+
+            int ttl;
+            if (!string.IsNullOrEmpty(m_bindingElement.TTL) && int.TryParse(m_bindingElement.TTL, out ttl))
             {
-                queue = m_model.QueueDeclare(queue, false, false, true, null);
+                args.Add("x-message-ttl", ttl);
             }
-            else
-            {
-                IDictionary args = new Dictionary<String, Object>();
 
-                int ttl;
-                if (!string.IsNullOrEmpty(m_bindingElement.TTL) && int.TryParse(m_bindingElement.TTL, out ttl))
-                {
-                    args.Add("x-message-ttl", ttl);
-                }
-
-                //Create a queue for messages destined to this service, bind it to the service URI routing key
-                queue = m_model.QueueDeclare(queue, true, false, false, args); 
-            }
-            
-            m_model.QueueBind(queue, exchange, routingKey, null);
+            //Create a queue for messages destined to this service, bind it to the service URI routing key
+            queue = m_model.QueueDeclare(queue, true, false, false, args);
 
             QueueingBasicConsumerBase queueingBasicConsumer;
 

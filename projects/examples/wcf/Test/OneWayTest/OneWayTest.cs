@@ -57,7 +57,7 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
         private ServiceHost m_alternativeHost;
         private bool m_serviceStarted;
         private ILogServiceContract m_client;
-        private Uri m_baseAddresses = new Uri("soap.amqp://amq.direct:2020/");
+        private readonly Uri m_baseAddresses = new Uri("amqp://localhost/");
 
         public void BeginRun()
         {
@@ -88,11 +88,11 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
         public void StartService(Binding binding)
         {
             m_host = new ServiceHost(typeof (LogService), m_baseAddresses);
-            m_alternativeHost = new ServiceHost(typeof(AlternativeLogService), m_baseAddresses);
+            //m_alternativeHost = new ServiceHost(typeof(AlternativeLogService), m_baseAddresses);
 
             StartService((RabbitMQBinding) binding, m_host, "LogService");
 
-            StartService(Program.GetBinding(), m_alternativeHost, "AnotherLog");
+            //StartService(Program.GetBinding(), m_alternativeHost, "AnotherLog");
 
             m_serviceStarted = true;
         }
@@ -103,7 +103,7 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
 
             binding.OneWayOnly = true;
             binding.TransactionFlow = false;
-            binding.ExactlyOnce = true;
+            binding.ExactlyOnce = false;
 
             ServiceEndpoint se = host.AddServiceEndpoint(typeof (ILogServiceContract), binding, address);
 
@@ -120,7 +120,7 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
             Util.Write(ConsoleColor.Yellow, "  Stopping Service...");
             if (m_serviceStarted)
             {
-                m_host.Close();
+                m_host.Close(TimeSpan.FromSeconds(5));
                 m_serviceStarted = false;
             }
 
@@ -131,6 +131,7 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
         {
             ((RabbitMQBinding)binding).OneWayOnly = true;
             ((RabbitMQBinding)binding).TransactionFlow = false;
+            ((RabbitMQBinding)binding).RoutingKey = "LogService";
             m_factory = new ChannelFactory<ILogServiceContract>(binding, new EndpointAddress(m_baseAddresses));
            
             m_factory.Open();

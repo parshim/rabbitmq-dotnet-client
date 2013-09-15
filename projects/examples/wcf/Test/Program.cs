@@ -55,9 +55,7 @@ namespace RabbitMQ.ServiceModel.Test
         {
             //return new WSHttpBinding();
             
-            return new RabbitMQBinding(System.Configuration.ConfigurationManager.AppSettings["manual-test-broker-hostname"],
-                                       int.Parse(System.Configuration.ConfigurationManager.AppSettings["manual-test-broker-port"]),
-                                       RabbitMQ.Client.Protocols.FromConfiguration("manual-test-broker-protocol"));
+            return new RabbitMQBinding(RabbitMQ.Client.Protocols.FromConfiguration("manual-test-broker-protocol"));
         }
 
         static void Main(string[] args)
@@ -73,8 +71,8 @@ namespace RabbitMQ.ServiceModel.Test
 
             int passed = 0, failed = 0;
             List<ITestCase> tests = new List<ITestCase>();
-            //tests.Add(new OneWayTest.OneWayTest());
-            tests.Add(new TwoWayTest.TwoWayTest());
+            tests.Add(new OneWayTest.OneWayTest());
+            //tests.Add(new TwoWayTest.TwoWayTest());
             //tests.Add(new SessionTest.SessionTest());
             //tests.Add(new DuplexTest.DuplexTest());
             //tests.Add(new FaultTest.FaultTest());

@@ -121,6 +121,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="src\serviceModel\CommunicationOperation.cs" />
+    <Compile Include="src\serviceModel\ConnectionManager.cs" />
     <Compile Include="src\serviceModel\CurrentVersion.cs" />
     <Compile Include="src\serviceModel\Debug.cs" />
     <Compile Include="src\serviceModel\RabbitMQBinding.cs" />

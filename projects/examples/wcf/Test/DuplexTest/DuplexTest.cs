@@ -49,7 +49,6 @@ namespace RabbitMQ.ServiceModel.Test.DuplexTest
 
     public class DuplexTest : IServiceTest<IPizzaService>, IPizzaCallback
     {
-        Uri serverUri = new Uri("soap.amqp://amq.direct/DuplexTest"); // TODO: Add Duplex Service Uri
         ServiceHost service;
         ManualResetEvent mre;
 
@@ -57,7 +56,7 @@ namespace RabbitMQ.ServiceModel.Test.DuplexTest
         {
             Util.Write(ConsoleColor.Yellow, "  Binding Service...");
             service = new ServiceHost(typeof(PizzaService));
-            service.AddServiceEndpoint(typeof(IPizzaService), binding, serverUri);
+            service.AddServiceEndpoint(typeof(IPizzaService), binding, new Uri("amqp://localhost/DuplexTest"));
             service.Open();
 
             Thread.Sleep(500);
@@ -73,7 +72,7 @@ namespace RabbitMQ.ServiceModel.Test.DuplexTest
 
         public IPizzaService GetClient(Binding binding)
         {
-            PizzaClient client = new PizzaClient(new InstanceContext(this), binding, new EndpointAddress(serverUri.ToString()));
+            PizzaClient client = new PizzaClient(new InstanceContext(this), binding, new EndpointAddress("amqp://localhost"));
             client.Open();
             return client;
         }

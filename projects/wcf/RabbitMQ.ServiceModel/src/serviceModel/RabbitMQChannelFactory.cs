@@ -44,27 +44,21 @@ namespace RabbitMQ.ServiceModel
     using System;
     using System.ServiceModel;
     using System.ServiceModel.Channels;
-
-    using RabbitMQ.Client;
-
-    internal sealed class RabbitMQChannelFactory<TChannel> : ChannelFactoryBase<IOutputChannel>
+    
+    internal sealed class RabbitMQChannelFactory : ChannelFactoryBase<IOutputChannel>
     {
-        private BindingContext m_context;
-        private CommunicationOperation m_openMethod;
-        private RabbitMQTransportBindingElement m_bindingElement;
-        private IModel m_model;
-
+        private readonly BindingContext m_context;
+        private readonly CommunicationOperation m_openMethod;
+        
         public RabbitMQChannelFactory(BindingContext context)
         {
             m_context = context;
-            m_openMethod = new CommunicationOperation(Open);
-            m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
-            m_model = null;
+            m_openMethod = Open;
         }
 
         protected override IOutputChannel OnCreateChannel(EndpointAddress address, Uri via)
         {
-            return new RabbitMQOutputChannel(m_context, m_model, address);
+            return new RabbitMQOutputChannel(m_context, address);
         }
         
         protected override IAsyncResult OnBeginOpen(TimeSpan timeout, AsyncCallback callback, object state)
@@ -79,29 +73,12 @@ namespace RabbitMQ.ServiceModel
 
         protected override void OnOpen(TimeSpan timeout)
         {
-#if VERBOSE
-            DebugHelper.Start();
-#endif
-            m_model = m_bindingElement.Open(timeout);
-#if VERBOSE
-            DebugHelper.Stop(" ## Out.Open {{Time={0}ms}}.");
-#endif
+
         }
 
         protected override void OnClose(TimeSpan timeout)
         {
-#if VERBOSE
-            DebugHelper.Start();
-#endif
-            
-            if (m_model != null) {
-                m_bindingElement.Close(m_model, timeout);
-                m_model = null;
-            }
 
-#if VERBOSE
-            DebugHelper.Stop(" ## Out.Close {{Time={0}ms}}.");
-#endif
         }
 
         protected override void OnAbort()

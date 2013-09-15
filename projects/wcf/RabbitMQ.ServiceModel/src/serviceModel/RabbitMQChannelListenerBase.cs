@@ -42,47 +42,34 @@
 namespace RabbitMQ.ServiceModel
 {
     using System;
-    using System.ServiceModel;
     using System.ServiceModel.Channels;
     using System.ServiceModel.Description;
 
     internal abstract class RabbitMQChannelListenerBase<TChannel> : ChannelListenerBase<TChannel> where TChannel: class, IChannel
     {
-        private Uri m_listenUri;
-        private BindingContext m_context;
+        private readonly Uri m_listenUri;
+        private readonly BindingContext m_context;
         protected RabbitMQTransportBindingElement m_bindingElement;
-        private CommunicationOperation m_closeMethod;
-        private CommunicationOperation m_openMethod;
-        private CommunicationOperation<TChannel> m_acceptChannelMethod;
-        private CommunicationOperation<bool> m_waitForChannelMethod;
-        private bool m_isTemporary;
-
+        private readonly CommunicationOperation m_closeMethod;
+        private readonly CommunicationOperation m_openMethod;
+        private readonly CommunicationOperation<TChannel> m_acceptChannelMethod;
+        private readonly CommunicationOperation<bool> m_waitForChannelMethod;
+        
         protected RabbitMQChannelListenerBase(BindingContext context)
         {
             m_context = context;
             m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
-            m_closeMethod = new CommunicationOperation(OnClose);
-            m_openMethod = new CommunicationOperation(OnOpen);
-            m_waitForChannelMethod = new CommunicationOperation<bool>(OnWaitForChannel);
-            m_acceptChannelMethod = new CommunicationOperation<TChannel>(OnAcceptChannel);
+            m_closeMethod = OnClose;
+            m_openMethod = OnOpen;
+            m_waitForChannelMethod = OnWaitForChannel;
+            m_acceptChannelMethod = OnAcceptChannel;
             
             if (context.ListenUriMode == ListenUriMode.Explicit && context.ListenUriBaseAddress != null)
             {
                 m_listenUri = new Uri(context.ListenUriBaseAddress, context.ListenUriRelativeAddress);
-                m_isTemporary = false;
-            }
-            else
-            {
-                m_listenUri = new Uri(new Uri("soap.amqp://amq.direct/"), Guid.NewGuid().ToString());
-                m_isTemporary = true;
             }
         }
-
-        public bool IsTemporary
-        {
-            get { return m_isTemporary; }
-        }
-
+        
         protected override void OnAbort()
         {
             OnClose(m_context.Binding.CloseTimeout);
