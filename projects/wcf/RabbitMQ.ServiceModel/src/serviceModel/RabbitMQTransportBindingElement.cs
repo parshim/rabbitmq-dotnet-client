@@ -41,7 +41,6 @@
 
 namespace RabbitMQ.ServiceModel
 {
-    using System.Configuration;
     using System.ServiceModel.Channels;
 
     using Client;
@@ -51,6 +50,8 @@ namespace RabbitMQ.ServiceModel
     /// </summary>
     public sealed class RabbitMQTransportBindingElement : TransportBindingElement, ITransactedBindingElement
     {
+        private string m_routingKey;
+
         /// <summary>
         /// Creates a new instance of the RabbitMQTransportBindingElement Class using the default protocol.
         /// </summary>
@@ -68,7 +69,9 @@ namespace RabbitMQ.ServiceModel
             MaxReceivedMessageSize = other.MaxReceivedMessageSize;
             TransactedReceiveEnabled = other.TransactedReceiveEnabled;
             TTL = other.TTL;
+            PersistentDelivery = other.PersistentDelivery;
             RoutingKey = other.RoutingKey;
+            AutoBindExchange = other.AutoBindExchange;
         }
         
         public override IChannelFactory<TChannel> BuildChannelFactory<TChannel>(BindingContext context)
@@ -112,7 +115,6 @@ namespace RabbitMQ.ServiceModel
         /// <summary>
         /// Enables transactional message delivery
         /// </summary>
-        [ConfigurationProperty("exactlyOnce")]
         public bool TransactedReceiveEnabled
         {
             get; set;
@@ -121,7 +123,6 @@ namespace RabbitMQ.ServiceModel
         /// <summary>
         /// Enables transactional message delivery
         /// </summary>
-        [ConfigurationProperty("TTL")]
         public string TTL
         {
             get; set;
@@ -173,8 +174,25 @@ namespace RabbitMQ.ServiceModel
         /// </summary>
         public string RoutingKey
         {
-            get;
-            set; 
+            get { return m_routingKey ?? ""; }
+            set { m_routingKey = value; }
+        }
+
+        /// <summary>
+        /// Exchange name to bind the listening queue. Value can be null.
+        /// </summary>
+        /// <remarks>If null queue will not be binded automaticaly</remarks>
+        public string AutoBindExchange
+        {
+            get; set;
+        }
+
+        /// <summary>
+        /// Defines messages delivery mode
+        /// </summary>
+        public bool PersistentDelivery
+        {
+            get; set;
         }
     }
 }

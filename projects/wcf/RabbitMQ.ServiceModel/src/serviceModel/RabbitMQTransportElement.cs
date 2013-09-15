@@ -65,7 +65,9 @@ namespace RabbitMQ.ServiceModel
                         bindingElement.GetType().AssemblyQualifiedName));
             }
 
+            rabbind.PersistentDelivery = this.PersistentDelivery;
             rabbind.RoutingKey = this.RoutingKey;
+            rabbind.AutoBindExchange = this.AutoBindExchange;
             rabbind.TTL = this.TTL;
             rabbind.BrokerProtocol = this.Protocol;
             rabbind.Password = this.Password;
@@ -80,7 +82,9 @@ namespace RabbitMQ.ServiceModel
             RabbitMQTransportElement element = from as RabbitMQTransportElement;
             if (element != null)
             {
-                this.RoutingKey = element.RoutingKey;
+                this.PersistentDelivery = this.PersistentDelivery;
+                this.RoutingKey = this.RoutingKey;
+                this.AutoBindExchange = this.AutoBindExchange;
                 this.TTL = element.TTL;
                 this.ProtocolVersion = element.ProtocolVersion;
                 this.Password = element.Password;
@@ -118,7 +122,9 @@ namespace RabbitMQ.ServiceModel
                         bindingElement.GetType().AssemblyQualifiedName));
             }
 
+            this.PersistentDelivery = rabbind.PersistentDelivery;
             this.RoutingKey = rabbind.RoutingKey;
+            this.AutoBindExchange = rabbind.AutoBindExchange;
             this.TTL = rabbind.TTL;
             this.ProtocolVersion = rabbind.BrokerProtocol.ApiName;
             this.Password = rabbind.Password;
@@ -135,21 +141,45 @@ namespace RabbitMQ.ServiceModel
         /// <summary>
         /// Specifies the hostname of the broker that the binding should connect to.
         /// </summary>
-        [ConfigurationProperty("routingKey", IsRequired = true)]
+        [ConfigurationProperty("routingKey", IsRequired = true, DefaultValue = "")]
         public string RoutingKey
         {
             get { return ((string)base["routingKey"]); }
             set { base["routingKey"] = value; }
         }
 
+        [ConfigurationProperty("autoBindExchange", IsRequired = true, DefaultValue = "")]
+        public string AutoBindExchange
+        {
+            get { return ((string)base["autoBindExchange"]); }
+            set { base["autoBindExchange"] = value; }
+        }
+
+        [ConfigurationProperty("persistentDelivery", IsRequired = false, DefaultValue = false)]
+        public bool PersistentDelivery
+        {
+            get { return ((bool)base["persistentDelivery"]); }
+            set { base["persistentDelivery"] = value; }
+        }
+
         /// <summary>
         /// Specifies the port of the broker that the binding should connect to.
         /// </summary>
-        [ConfigurationProperty("TTL", DefaultValue = "")]
+        [ConfigurationProperty("TTL", IsRequired = false, DefaultValue = "")]
         public string TTL
         {
             get { return ((string)base["TTL"]); }
             set { base["TTL"] = value; }
+        }
+
+        /// <summary>
+        /// Enables transactional message delivery
+        /// </summary>
+        [ConfigurationProperty("exactlyOnce", IsRequired = false, DefaultValue = false)]
+        public bool ExactlyOnce
+        {
+            get { return ((bool)base["exactlyOnce"]); }
+            set { base["exactlyOnce"] = value; }
         }
 
         /// <summary>
@@ -188,12 +218,6 @@ namespace RabbitMQ.ServiceModel
                 GetProtocol();
             }
         }
-
-        /// <summary>
-        /// Enables transactional message delivery
-        /// </summary>
-        [ConfigurationProperty("exactlyOnce")]
-        public bool ExactlyOnce { get; set; }
 
         private IProtocol GetProtocol()
         {

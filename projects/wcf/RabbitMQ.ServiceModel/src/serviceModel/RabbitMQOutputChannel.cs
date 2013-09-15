@@ -83,23 +83,21 @@ namespace RabbitMQ.ServiceModel
 
                 IBasicProperties basicProperties = m_model.CreateBasicProperties();
 
+                // Set message properties
                 basicProperties.Timestamp = new AmqpTimestamp(DateTime.Now);
                 basicProperties.ContentType = "SOAP";
+                basicProperties.DeliveryMode = m_bindingElement.PersistentDelivery ? (byte)2 : (byte)1;
+                if (!string.IsNullOrEmpty(m_bindingElement.TTL))
+                {
+                    basicProperties.Expiration = m_bindingElement.TTL;
+                }
 
                 // TODO: read custom headers and put it into the message properties
                 //foreach (MessageHeaderInfo messageHeaderInfo in message.Headers)
                 //{
                 //    basicProperties.Headers.Add(messageHeaderInfo.Name, "");
                 //}
-
-                // TODO: move message persistency to transport configuration
-                //basicProperties.SetPersistent(false);
-
-                if (!string.IsNullOrEmpty(m_bindingElement.TTL))
-                {
-                    basicProperties.Expiration = m_bindingElement.TTL;
-                }
-
+                
                 using (MemoryStream str = new MemoryStream())
                 {
                     m_encoder.WriteMessage(message, str);

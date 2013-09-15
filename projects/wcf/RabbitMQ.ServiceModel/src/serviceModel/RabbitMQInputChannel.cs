@@ -172,6 +172,13 @@ namespace RabbitMQ.ServiceModel
             //Create a queue for messages destined to this service, bind it to the service URI routing key
             queue = m_model.QueueDeclare(queue, true, false, false, args);
 
+            string exchange = m_bindingElement.AutoBindExchange;
+
+            if (!string.IsNullOrEmpty(exchange))
+            {
+                m_model.QueueBind(queue, exchange, m_bindingElement.RoutingKey);
+            }
+
             QueueingBasicConsumerBase queueingBasicConsumer;
 
             // Create queue

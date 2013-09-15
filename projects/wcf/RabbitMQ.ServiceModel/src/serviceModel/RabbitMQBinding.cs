@@ -103,8 +103,6 @@ namespace RabbitMQ.ServiceModel
             base.Namespace = "http://schemas.rabbitmq.com/2007/RabbitMQ/";
 
             Initialize();
-
-            this.TransactionFlow = true;
         }
 
         public override BindingElementCollection CreateBindingElements()
@@ -112,7 +110,9 @@ namespace RabbitMQ.ServiceModel
             m_transport.BrokerProtocol = this.BrokerProtocol;
             m_transport.TransactedReceiveEnabled = this.ExactlyOnce;
             m_transport.TTL = this.TTL;
+            m_transport.PersistentDelivery = this.PersistentDelivery;
             m_transport.RoutingKey = this.RoutingKey;
+            m_transport.AutoBindExchange = this.AutoBindExchange;
             if (MaxMessageSize != DefaultMaxMessageSize)
             {
                 m_transport.MaxReceivedMessageSize = MaxMessageSize;
@@ -219,5 +219,16 @@ namespace RabbitMQ.ServiceModel
         /// Message time to live
         /// </summary>
         public string TTL { get; set; }
+
+        /// <summary>
+        /// Exchange name to bind the listening queue. Value can be null.
+        /// </summary>
+        /// <remarks>If null queue will not be binded automaticaly</remarks>
+        public string AutoBindExchange { get; set; }
+
+        /// <summary>
+        /// Defines messages delivery mode
+        /// </summary>
+        public bool PersistentDelivery { get; set; }
     }
 }

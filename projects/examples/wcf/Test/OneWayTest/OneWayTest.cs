@@ -61,14 +61,22 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
 
         public void BeginRun()
         {
-            StartService(Program.GetBinding());
+            StartService(new RabbitMQBinding
+                {
+                    AutoBindExchange = "amq.direct",
+                    OneWayOnly = true,
+                    ExactlyOnce = true
+                });
         
-            m_client = GetClient(Program.GetBinding());
+            m_client = GetClient(new RabbitMQBinding
+                {
+                    OneWayOnly = true
+                });
+
             m_client.Log(new LogData(LogLevel.High, "Hello Rabbit"));
             m_client.Log(new LogData(LogLevel.Medium, "Hello Rabbit"));
             m_client.Log(new LogData(LogLevel.Low, "Hello Rabbit"));
             m_client.Log(new LogData(LogLevel.Low, "Last Message"));
-
         }
 
         public void Run()
@@ -88,22 +96,18 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
         public void StartService(Binding binding)
         {
             m_host = new ServiceHost(typeof (LogService), m_baseAddresses);
-            //m_alternativeHost = new ServiceHost(typeof(AlternativeLogService), m_baseAddresses);
+            m_alternativeHost = new ServiceHost(typeof(AlternativeLogService), m_baseAddresses);
 
-            StartService((RabbitMQBinding) binding, m_host, "LogService");
+            StartService(binding, m_host, "LogService");
 
-            //StartService(Program.GetBinding(), m_alternativeHost, "AnotherLog");
+            StartService(binding, m_alternativeHost, "AnotherLog");
 
             m_serviceStarted = true;
         }
 
-        private static void StartService(RabbitMQBinding binding, ServiceHost host, string address)
+        private static void StartService(Binding binding, ServiceHost host, string address)
         {
             Util.Write(ConsoleColor.Yellow, "  Binding Service...");
-
-            binding.OneWayOnly = true;
-            binding.TransactionFlow = false;
-            binding.ExactlyOnce = false;
 
             ServiceEndpoint se = host.AddServiceEndpoint(typeof (ILogServiceContract), binding, address);
 
@@ -129,10 +133,7 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
 
         public ILogServiceContract GetClient(Binding binding)
         {
-            ((RabbitMQBinding)binding).OneWayOnly = true;
-            ((RabbitMQBinding)binding).TransactionFlow = false;
-            ((RabbitMQBinding)binding).RoutingKey = "LogService";
-            m_factory = new ChannelFactory<ILogServiceContract>(binding, new EndpointAddress(m_baseAddresses));
+            m_factory = new ChannelFactory<ILogServiceContract>(binding, new EndpointAddress("amqp://localhost/amq.direct"));
            
             m_factory.Open();
             return m_factory.CreateChannel();
