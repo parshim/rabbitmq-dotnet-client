@@ -168,16 +168,6 @@ namespace RabbitMQ.ServiceModel
         }
 
         #endregion
-
-        protected string GetExchangeName(EndpointAddress address)
-        {
-            return address.Uri.AbsolutePath.TrimStart('/');
-        }
-        
-        protected string GetQueueName(EndpointAddress address)
-        {
-            return address.Uri.AbsolutePath.TrimStart('/');
-        }
         
         public CommunicationState State
         {

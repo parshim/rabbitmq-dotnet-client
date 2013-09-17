@@ -40,7 +40,6 @@
 
 using System.Collections;
 using System.Collections.Generic;
-using CommonFraming = RabbitMQ.Client.Framing.v0_9;
 
 namespace RabbitMQ.ServiceModel
 {
@@ -57,25 +56,27 @@ namespace RabbitMQ.ServiceModel
     // the versions we support*. Obviously we may need to revisit this if
     // that ever changes.
 
-    internal sealed class RabbitMQInputChannel : RabbitMQInputChannelBase
+    internal sealed class RabbitMQTransportInputChannel : RabbitMQInputChannelBase
     {
+        private readonly bool m_autoDelete;
+        private readonly string m_bindToExchange;
         private readonly RabbitMQTransportBindingElement m_bindingElement;
         private readonly MessageEncoder m_encoder;
         
         private IModel m_model;
         private IMessageQueue m_messageQueue;
         
-        public RabbitMQInputChannel(BindingContext context, EndpointAddress address)
-            : base(context, address)
+        public RabbitMQTransportInputChannel(BindingContext context, EndpointAddress address, bool autoDelete, string bindToExchange) : base(context, address)
         {
+            m_autoDelete = autoDelete;
+            m_bindToExchange = bindToExchange;
             m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
             TextMessageEncodingBindingElement encoderElem = context.BindingParameters.Find<TextMessageEncodingBindingElement>();
             encoderElem.ReaderQuotas.MaxStringContentLength = (int)m_bindingElement.MaxReceivedMessageSize;
             m_encoder = encoderElem.CreateMessageEncoderFactory().Encoder;
-            
+
             m_messageQueue = null;
         }
-
 
         public override Message Receive(TimeSpan timeout)
         {
@@ -101,7 +102,7 @@ namespace RabbitMQ.ServiceModel
             }
             catch (EndOfStreamException)
             {
-                if (m_messageQueue== null || m_messageQueue.ShutdownReason != null && m_messageQueue.ShutdownReason.ReplyCode != CommonFraming.Constants.ReplySuccess)
+                if (m_messageQueue == null || m_messageQueue.ShutdownReason != null && m_messageQueue.ShutdownReason.ReplyCode != RabbitMQ.Client.Framing.v0_9.Constants.ReplySuccess)
                 {
                     OnFaulted();
                 }
@@ -157,9 +158,11 @@ namespace RabbitMQ.ServiceModel
 #if VERBOSE
             DebugHelper.Start();
 #endif
-            m_model = ConnectionManager.Instance.OpenModel(LocalAddress, m_bindingElement, timeout);
+            RabbitMQUri uri = new RabbitMQUri(LocalAddress.Uri);
 
-            string queue = GetQueueName(LocalAddress);
+            m_model = ConnectionManager.Instance.OpenModel(uri, m_bindingElement.BrokerProtocol, timeout);
+
+            string queue = uri.Endpoint;
 
             IDictionary args = new Dictionary<String, Object>();
 
@@ -170,13 +173,11 @@ namespace RabbitMQ.ServiceModel
             }
 
             //Create a queue for messages destined to this service, bind it to the service URI routing key
-            queue = m_model.QueueDeclare(queue, true, false, false, args);
+            queue = m_model.QueueDeclare(queue, true, false, m_autoDelete, args);
 
-            string exchange = m_bindingElement.AutoBindExchange;
-
-            if (!string.IsNullOrEmpty(exchange))
+            if (!string.IsNullOrEmpty(m_bindToExchange))
             {
-                m_model.QueueBind(queue, exchange, m_bindingElement.RoutingKey);
+                m_model.QueueBind(queue, m_bindToExchange, uri.RoutingKey);
             }
 
             QueueingBasicConsumerBase queueingBasicConsumer;

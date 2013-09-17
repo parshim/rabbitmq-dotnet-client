@@ -44,30 +44,40 @@ namespace RabbitMQ.ServiceModel
     using System;
     using System.ServiceModel;
     using System.ServiceModel.Channels;
-    using Client;
-
-    internal sealed class RabbitMQChannelListener : RabbitMQChannelListenerBase<IInputChannel>
+    
+    internal sealed class RabbitMQTransportChannelListener<T> : RabbitMQChannelListenerBase<T> where T : class, IChannel
     {
-        private IInputChannel m_channel;
-        private IModel m_model;
-
-        internal RabbitMQChannelListener(BindingContext context)
-            : base(context)
+        private readonly bool m_autoDelete;
+        private readonly string m_bindToExchange;
+        private IChannel m_channel;
+        
+        internal RabbitMQTransportChannelListener(BindingContext context, Uri listenUri, bool autoDelete, string bindToExchange)
+            : base(context, listenUri)
         {
+            m_autoDelete = autoDelete;
+            m_bindToExchange = bindToExchange;
             m_channel = null;
-            m_model = null;
         }
 
-        protected override IInputChannel OnAcceptChannel(TimeSpan timeout)
+        protected override T OnAcceptChannel(TimeSpan timeout)
         {
             // Since only one connection to a broker is required (even for communication
             // with multiple exchanges 
             if (m_channel != null)
                 return null;
 
-            m_channel = new RabbitMQInputChannel(Context, new EndpointAddress(Uri.ToString()));
+            if (typeof (T) == typeof (IInputChannel))
+            {
+                m_channel = new RabbitMQTransportInputChannel(Context, new EndpointAddress(Uri.ToString()), m_autoDelete, m_bindToExchange);
+            }
+            else
+            {
+                return null;
+            }
+
             m_channel.Closed += ListenChannelClosed;
-            return m_channel;
+
+            return (T) m_channel;
         }
         
         protected override bool OnWaitForChannel(TimeSpan timeout)

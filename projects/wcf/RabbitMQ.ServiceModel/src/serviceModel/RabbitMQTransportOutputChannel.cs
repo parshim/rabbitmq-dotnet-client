@@ -48,13 +48,13 @@ namespace RabbitMQ.ServiceModel
 
     using Client;
 
-    internal sealed class RabbitMQOutputChannel : RabbitMQOutputChannelBase
+    internal sealed class RabbitMQTransportOutputChannel : RabbitMQOutputChannelBase
     {
         private readonly RabbitMQTransportBindingElement m_bindingElement;
         private readonly MessageEncoder m_encoder;
         private IModel m_model;
 
-        public RabbitMQOutputChannel(BindingContext context, EndpointAddress address)
+        public RabbitMQTransportOutputChannel(BindingContext context, EndpointAddress address)
             : base(context, address)
         {
             //m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
@@ -68,18 +68,12 @@ namespace RabbitMQ.ServiceModel
 
         public override void Send(Message message, TimeSpan timeout)
         {
-            if (message.State != MessageState.Closed)
-            {
-                
+            if (State == CommunicationState.Opened && !message.IsFault)
+            {       
 #if VERBOSE
                 DebugHelper.Start();
 #endif
                 byte[] body;
-
-                
-                string exchange = GetExchangeName(RemoteAddress);
-
-                string routingKey = m_bindingElement.RoutingKey;
 
                 IBasicProperties basicProperties = m_model.CreateBasicProperties();
 
@@ -97,15 +91,22 @@ namespace RabbitMQ.ServiceModel
                 //{
                 //    basicProperties.Headers.Add(messageHeaderInfo.Name, "");
                 //}
-                
+
+                if (m_bindingElement.ReplyToExchange != null)
+                {
+                    message.Headers.ReplyTo = new EndpointAddress(m_bindingElement.ReplyToExchange);
+                }
+
                 using (MemoryStream str = new MemoryStream())
                 {
                     m_encoder.WriteMessage(message, str);
                     body = str.ToArray();
                 }
 
-                m_model.BasicPublish(exchange,
-                                     routingKey,
+                RabbitMQUri uri = new RabbitMQUri(RemoteAddress.Uri);
+
+                m_model.BasicPublish(uri.Endpoint,
+                                     uri.RoutingKey,
                                      basicProperties,
                                      body);
 
@@ -149,7 +150,7 @@ namespace RabbitMQ.ServiceModel
 #if VERBOSE
             DebugHelper.Start();
 #endif
-            m_model = ConnectionManager.Instance.OpenModel(RemoteAddress, m_bindingElement, timeout);
+            m_model = ConnectionManager.Instance.OpenModel(new RabbitMQUri(RemoteAddress.Uri), m_bindingElement.BrokerProtocol, timeout);
 #if VERBOSE
             DebugHelper.Stop(" ## Out.Open {{Time={0}ms}}.");
 #endif

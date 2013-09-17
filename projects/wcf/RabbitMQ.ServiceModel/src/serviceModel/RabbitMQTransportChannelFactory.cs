@@ -45,20 +45,31 @@ namespace RabbitMQ.ServiceModel
     using System.ServiceModel;
     using System.ServiceModel.Channels;
     
-    internal sealed class RabbitMQChannelFactory : ChannelFactoryBase<IOutputChannel>
+    internal sealed class RabbitMQTransportChannelFactory<T> : ChannelFactoryBase<T>
     {
         private readonly BindingContext m_context;
         private readonly CommunicationOperation m_openMethod;
         
-        public RabbitMQChannelFactory(BindingContext context)
+        public RabbitMQTransportChannelFactory(BindingContext context)
         {
             m_context = context;
             m_openMethod = Open;
         }
 
-        protected override IOutputChannel OnCreateChannel(EndpointAddress address, Uri via)
+        protected override T OnCreateChannel(EndpointAddress address, Uri via)
         {
-            return new RabbitMQOutputChannel(m_context, address);
+            IChannel channel;
+
+            if (typeof (T) == typeof (IOutputChannel))
+            {    
+                channel = new RabbitMQTransportOutputChannel(m_context, address);
+            }
+            else
+            {
+                return default(T);
+            }
+
+            return (T) channel;
         }
         
         protected override IAsyncResult OnBeginOpen(TimeSpan timeout, AsyncCallback callback, object state)

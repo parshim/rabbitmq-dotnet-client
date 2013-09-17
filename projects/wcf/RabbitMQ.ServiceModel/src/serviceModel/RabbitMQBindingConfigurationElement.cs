@@ -82,14 +82,8 @@ namespace RabbitMQ.ServiceModel
             if (rabbind != null)
             {
                 this.MaxMessageSize = rabbind.MaxMessageSize;
-                this.OneWayOnly = rabbind.OneWayOnly;
-                this.TransactionFlowEnabled = rabbind.TransactionFlow;
                 this.ExactlyOnce = rabbind.ExactlyOnce;
                 this.TTL = rabbind.TTL;
-                this.RoutingKey = rabbind.RoutingKey;
-                this.VirtualHost = rabbind.Transport.VirtualHost;
-                this.Username = rabbind.Transport.Username;
-                this.Password = rabbind.Transport.Password;
             }
         }
 
@@ -107,16 +101,15 @@ namespace RabbitMQ.ServiceModel
                         binding.GetType().AssemblyQualifiedName));
             }
 
-            rabbind.RoutingKey = this.RoutingKey;
+            rabbind.AutoBindExchange = this.AutoBindExchange;
             rabbind.BrokerProtocol = this.Protocol;
-            rabbind.OneWayOnly = this.OneWayOnly;
-            rabbind.TransactionFlow = this.TransactionFlowEnabled;
-            rabbind.TTL = this.TTL;
             rabbind.ExactlyOnce = this.ExactlyOnce;
-            rabbind.Transport.Password = this.Password;
-            rabbind.Transport.Username = this.Username;
-            rabbind.Transport.VirtualHost = this.VirtualHost;
             rabbind.Transport.MaxReceivedMessageSize = this.MaxMessageSize;
+            rabbind.OneWayOnly = this.OneWayOnly;
+            rabbind.PersistentDelivery = this.PersistentDelivery;
+            rabbind.ReplyToExchange = this.ReplyToExchange == null ? null : new Uri(this.ReplyToExchange);
+            rabbind.ReplyToQueue = this.ReplyToQueue;
+            rabbind.TTL = this.TTL;
         }
 
         /// <summary>
@@ -128,48 +121,59 @@ namespace RabbitMQ.ServiceModel
             get { return ((bool)base["exactlyOnce"]); }
             set { base["exactlyOnce"] = value; }
         }
-
-        /// <summary>
-        /// Specifies the hostname of the broker that the binding should connect to.
-        /// </summary>
-        [ConfigurationProperty("routingKey", IsRequired = false)]
-        public String RoutingKey
-        {
-            get { return ((String)base["routingKey"]); }
-            set { base["routingKey"] = value; }
-        }
         
         /// <summary>
-        /// Specifies whether or not the CompositeDuplex and ReliableSession
-        /// binding elements are added to the channel stack.
+        /// Defines messages delivery mode
         /// </summary>
-        [ConfigurationProperty("oneWay", DefaultValue = false)]
+        [ConfigurationProperty("persistentDelivery")]
+        public bool PersistentDelivery
+        {
+            get { return ((bool)base["persistentDelivery"]); }
+            set { base["persistentDelivery"] = value; }
+        }
+
+        /// <summary>
+        /// Defines if one way or duplex comunication is required over this binding
+        /// </summary>
+        [ConfigurationProperty("oneWayOnly", DefaultValue = true)]
         public bool OneWayOnly
         {
-            get { return ((bool)base["oneWay"]); }
-            set { base["oneWay"] = value; }
+            get { return ((bool)base["oneWayOnly"]); }
+            set { base["oneWayOnly"] = value; }
         }
 
         /// <summary>
-        /// Password to use when authenticating with the broker
+        /// ReplyTo exchange URI for duplex communication callbacks
         /// </summary>
-        [ConfigurationProperty("password", DefaultValue = ConnectionFactory.DefaultPass)]
-        public string Password
+        [ConfigurationProperty("replyToExchange", DefaultValue = null)]
+        public string ReplyToExchange
         {
-            get { return ((string)base["password"]); }
-            set { base["password"] = value; }
+            get { return ((string)base["replyToExchange"]); }
+            set { base["replyToExchange"] = value; }
         }
 
         /// <summary>
-        /// Specifies whether or not WS-AtomicTransactions are supported by the binding
+        /// ReplyTo queue name for duplex communication
         /// </summary>
-        [ConfigurationProperty("transactionFlow", DefaultValue = false)]
-        public bool TransactionFlowEnabled
+        /// <remarks>If null will auto delete queue will be generated</remarks>
+        [ConfigurationProperty("replyToQueue", DefaultValue = null)]
+        public string ReplyToQueue
         {
-            get { return ((bool)base["transactionFlow"]); }
-            set { base["transactionFlow"] = value; }
+            get { return ((string)base["replyToQueue"]); }
+            set { base["replyToQueue"] = value; }
         }
 
+        /// <summary>
+        /// Exchange name to bind the listening queue. Value can be null.
+        /// </summary>
+        /// <remarks>If null queue will not be binded automaticaly</remarks>
+        [ConfigurationProperty("autoBindExchange", DefaultValue = null)]
+        public string AutoBindExchange
+        {
+            get { return ((string)base["autoBindExchange"]); }
+            set { base["autoBindExchange"] = value; }
+        }
+        
         /// <summary>
         /// Specifies message TTL. For client side binding it will be per message TTL, for service side binding it will be per-queue message TTL. Use null or discard to diable message TTL.
         /// </summary>
@@ -179,17 +183,7 @@ namespace RabbitMQ.ServiceModel
             get { return ((string)base["TTL"]); }
             set { base["TTL"] = value; }
         }
-
-        /// <summary>
-        /// The username  to use when authenticating with the broker
-        /// </summary>
-        [ConfigurationProperty("username", DefaultValue = ConnectionFactory.DefaultUser)]
-        public string Username
-        {
-            get { return ((string)base["username"]); }
-            set { base["username"] = value; }
-        }
-
+        
         /// <summary>
         /// Specifies the protocol version to use when communicating with the broker
         /// </summary>
@@ -234,17 +228,7 @@ namespace RabbitMQ.ServiceModel
             }
         }
 
-        /// <summary>
-        /// The virtual host to access.
-        /// </summary>
-        [ConfigurationProperty("virtualHost", DefaultValue = ConnectionFactory.DefaultVHost)]
-        public string VirtualHost
-        {
-            get { return ((string)base["virtualHost"]); }
-            set { base["virtualHost"] = value; }
-        }
-
-        protected override System.Type BindingElementType
+        protected override Type BindingElementType
         {
             get { return typeof(RabbitMQBinding); }
         }

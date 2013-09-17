@@ -39,6 +39,8 @@
 //---------------------------------------------------------------------------
 
 
+using System.ServiceModel.Description;
+
 namespace RabbitMQ.ServiceModel.Test.DuplexTest
 {
     using System;
@@ -56,23 +58,26 @@ namespace RabbitMQ.ServiceModel.Test.DuplexTest
         {
             Util.Write(ConsoleColor.Yellow, "  Binding Service...");
             service = new ServiceHost(typeof(PizzaService));
-            service.AddServiceEndpoint(typeof(IPizzaService), binding, new Uri("amqp://localhost/DuplexTest"));
+            ServiceEndpoint endpoint = service.AddServiceEndpoint(typeof(IPizzaService), binding, new Uri("amqp://localhost/DuplexTest?routingKey=Pizza"));
+
+            endpoint.Behaviors.Add(new ReplyToBehavior());
+
             service.Open();
 
-            Thread.Sleep(500);
+            Thread.Sleep(2500);
             Util.WriteLine(ConsoleColor.Green, "[DONE]");
         }
 
         public void StopService()
         {
             Util.Write(ConsoleColor.Yellow, "  Stopping Service...");
-            service.Close();
+            service.Close(TimeSpan.FromSeconds(5));
             Util.WriteLine(ConsoleColor.Green, "[DONE]");
         }
 
         public IPizzaService GetClient(Binding binding)
         {
-            PizzaClient client = new PizzaClient(new InstanceContext(this), binding, new EndpointAddress("amqp://localhost"));
+            PizzaClient client = new PizzaClient(new InstanceContext(this), binding, new EndpointAddress("amqp://localhost/amq.direct?routingKey=Pizza"));
             client.Open();
             return client;
         }
@@ -87,9 +92,22 @@ namespace RabbitMQ.ServiceModel.Test.DuplexTest
         public void Run()
         {
             mre = new ManualResetEvent(false);
-            StartService(Program.GetBinding());
+            StartService(new RabbitMQBinding
+            {
+                AutoBindExchange = "amq.direct",
+                ExactlyOnce = false,
+                OneWayOnly = false,
+            });
 
-            IPizzaService client = GetClient(Program.GetBinding());
+            IPizzaService client = GetClient(new RabbitMQBinding
+                {
+                    ReplyToQueue = "DuplexTestCallback?routingKey=PizzaCallback",
+                    AutoBindExchange = "amq.direct",
+                    ReplyToExchange = new Uri("amqp://localhost/amq.direct?routingKey=PizzaCallback"),
+                    ExactlyOnce = false,
+                    OneWayOnly = false,
+                });
+
             Order lunch = new Order();
             lunch.Items = new List<Pizza>();
             lunch.Items.Add(new Pizza(PizzaBase.ThinCrust, "Meat Feast"));

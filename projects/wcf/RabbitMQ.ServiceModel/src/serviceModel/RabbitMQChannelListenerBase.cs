@@ -43,9 +43,8 @@ namespace RabbitMQ.ServiceModel
 {
     using System;
     using System.ServiceModel.Channels;
-    using System.ServiceModel.Description;
 
-    internal abstract class RabbitMQChannelListenerBase<TChannel> : ChannelListenerBase<TChannel> where TChannel: class, IChannel
+    public abstract class RabbitMQChannelListenerBase<TChannel> : ChannelListenerBase<TChannel> where TChannel: class, IChannel
     {
         private readonly Uri m_listenUri;
         private readonly BindingContext m_context;
@@ -55,19 +54,15 @@ namespace RabbitMQ.ServiceModel
         private readonly CommunicationOperation<TChannel> m_acceptChannelMethod;
         private readonly CommunicationOperation<bool> m_waitForChannelMethod;
         
-        protected RabbitMQChannelListenerBase(BindingContext context)
+        protected RabbitMQChannelListenerBase(BindingContext context, Uri listenUri)
         {
             m_context = context;
+            m_listenUri = listenUri;
             m_bindingElement = context.Binding.Elements.Find<RabbitMQTransportBindingElement>();
             m_closeMethod = OnClose;
             m_openMethod = OnOpen;
             m_waitForChannelMethod = OnWaitForChannel;
             m_acceptChannelMethod = OnAcceptChannel;
-            
-            if (context.ListenUriMode == ListenUriMode.Explicit && context.ListenUriBaseAddress != null)
-            {
-                m_listenUri = new Uri(context.ListenUriBaseAddress, context.ListenUriRelativeAddress);
-            }
         }
         
         protected override void OnAbort()

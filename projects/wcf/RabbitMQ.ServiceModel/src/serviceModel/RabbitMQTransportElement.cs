@@ -66,14 +66,13 @@ namespace RabbitMQ.ServiceModel
             }
 
             rabbind.PersistentDelivery = this.PersistentDelivery;
-            rabbind.RoutingKey = this.RoutingKey;
             rabbind.AutoBindExchange = this.AutoBindExchange;
             rabbind.TTL = this.TTL;
             rabbind.BrokerProtocol = this.Protocol;
-            rabbind.Password = this.Password;
-            rabbind.Username = this.Username;
-            rabbind.VirtualHost = this.VirtualHost;
             rabbind.TransactedReceiveEnabled = this.ExactlyOnce;
+            rabbind.ReplyToQueue = this.ReplyToQueue;
+            rabbind.ReplyToExchange = this.ReplyToExchange != null ? new Uri(this.ReplyToExchange) : null;
+            rabbind.OneWayOnly = this.OneWayOnly;
         }
 
         public override void CopyFrom(ServiceModelExtensionElement from)
@@ -83,14 +82,13 @@ namespace RabbitMQ.ServiceModel
             if (element != null)
             {
                 this.PersistentDelivery = this.PersistentDelivery;
-                this.RoutingKey = this.RoutingKey;
                 this.AutoBindExchange = this.AutoBindExchange;
                 this.TTL = element.TTL;
                 this.ProtocolVersion = element.ProtocolVersion;
-                this.Password = element.Password;
-                this.Username = element.Username;
-                this.VirtualHost = element.VirtualHost;
                 this.ExactlyOnce = element.ExactlyOnce;
+                this.ReplyToQueue = element.ReplyToQueue;
+                this.ReplyToExchange = element.ReplyToExchange;
+                this.OneWayOnly = element.OneWayOnly;
             }
         }
 
@@ -101,12 +99,12 @@ namespace RabbitMQ.ServiceModel
             return element;
         }
 
-        protected override System.ServiceModel.Channels.TransportBindingElement CreateDefaultBindingElement()
+        protected override TransportBindingElement CreateDefaultBindingElement()
         {
             return new RabbitMQTransportBindingElement();
         }
 
-        protected override void InitializeFrom(System.ServiceModel.Channels.BindingElement bindingElement)
+        protected override void InitializeFrom(BindingElement bindingElement)
         {
             base.InitializeFrom(bindingElement);
 
@@ -123,29 +121,17 @@ namespace RabbitMQ.ServiceModel
             }
 
             this.PersistentDelivery = rabbind.PersistentDelivery;
-            this.RoutingKey = rabbind.RoutingKey;
             this.AutoBindExchange = rabbind.AutoBindExchange;
             this.TTL = rabbind.TTL;
             this.ProtocolVersion = rabbind.BrokerProtocol.ApiName;
-            this.Password = rabbind.Password;
-            this.Username = rabbind.Username;
-            this.VirtualHost = rabbind.VirtualHost;
-            
+            this.ReplyToQueue = rabbind.ReplyToQueue;
+            this.ReplyToExchange = rabbind.ReplyToExchange.ToString();
+            this.OneWayOnly = rabbind.OneWayOnly;
         }
 
-        public override System.Type BindingElementType
+        public override Type BindingElementType
         {
             get { return typeof(RabbitMQTransportElement); }
-        }
-
-        /// <summary>
-        /// Specifies the hostname of the broker that the binding should connect to.
-        /// </summary>
-        [ConfigurationProperty("routingKey", IsRequired = true, DefaultValue = "")]
-        public string RoutingKey
-        {
-            get { return ((string)base["routingKey"]); }
-            set { base["routingKey"] = value; }
         }
 
         [ConfigurationProperty("autoBindExchange", IsRequired = true, DefaultValue = "")]
@@ -160,6 +146,16 @@ namespace RabbitMQ.ServiceModel
         {
             get { return ((bool)base["persistentDelivery"]); }
             set { base["persistentDelivery"] = value; }
+        }
+
+        /// <summary>
+        /// Defines if one way or duplex comunication is required over this binding
+        /// </summary>
+        [ConfigurationProperty("oneWayOnly", DefaultValue = true)]
+        public bool OneWayOnly
+        {
+            get { return ((bool)base["oneWayOnly"]); }
+            set { base["oneWayOnly"] = value; }
         }
 
         /// <summary>
@@ -181,27 +177,7 @@ namespace RabbitMQ.ServiceModel
             get { return ((bool)base["exactlyOnce"]); }
             set { base["exactlyOnce"] = value; }
         }
-
-        /// <summary>
-        /// Password to use when authenticating with the broker
-        /// </summary>
-        [ConfigurationProperty("password", DefaultValue = ConnectionFactory.DefaultPass)]
-        public string Password
-        {
-            get { return ((string)base["password"]); }
-            set { base["password"] = value; }
-        }
-
-        /// <summary>
-        /// The username  to use when authenticating with the broker
-        /// </summary>
-        [ConfigurationProperty("username", DefaultValue = ConnectionFactory.DefaultUser)]
-        public string Username
-        {
-            get { return ((string)base["username"]); }
-            set { base["username"] = value; }
-        }
-
+        
         /// <summary>
         /// Specifies the protocol version to use when communicating with the broker
         /// </summary>
@@ -216,6 +192,39 @@ namespace RabbitMQ.ServiceModel
             {
                 base["protocolversion"] = value;
                 GetProtocol();
+            }
+        }
+
+        /// <summary>
+        /// ReplyTo exchange URI for duplex communication callbacks
+        /// </summary>
+        [ConfigurationProperty("replyToExchange", DefaultValue = "")]
+        public string ReplyToExchange
+        {
+            get
+            {
+                return ((string)base["replyToExchange"]);
+            }
+            set
+            {
+                base["replyToExchange"] = value;
+            }
+        }
+
+        /// <summary>
+        /// ReplyTo queue name for duplex communication
+        /// </summary>
+        /// <remarks>If null will auto delete queue will be generated</remarks>
+        [ConfigurationProperty("replyToQueue", DefaultValue = "")]
+        public string ReplyToQueue
+        {
+            get
+            {
+                return ((string)base["replyToQueue"]);
+            }
+            set
+            {
+                base["replyToQueue"] = value;
             }
         }
 
@@ -234,26 +243,7 @@ namespace RabbitMQ.ServiceModel
         /// Gets the protocol version specified by the current configuration
         /// </summary>
         public IProtocol Protocol { get { return GetProtocol(); } }
-
-        /// <summary>
-        /// The virtual host to access.
-        /// </summary>
-        [ConfigurationProperty("virtualHost", DefaultValue = ConnectionFactory.DefaultVHost)]
-        public string VirtualHost
-        {
-            get { return ((string)base["virtualHost"]); }
-            set { base["virtualHost"] = value; }
-        }
-
-        /// <summary>
-        /// The largest receivable encoded message
-        /// </summary>
-        public new long MaxReceivedMessageSize
-        {
-            get { return MaxReceivedMessageSize; }
-            set { MaxReceivedMessageSize = value; }
-        }
-
+        
         protected override ConfigurationPropertyCollection Properties
         {
             get

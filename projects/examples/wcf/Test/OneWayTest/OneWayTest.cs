@@ -64,8 +64,8 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
             StartService(new RabbitMQBinding
                 {
                     AutoBindExchange = "amq.direct",
+                    ExactlyOnce = true,
                     OneWayOnly = true,
-                    ExactlyOnce = true
                 });
         
             m_client = GetClient(new RabbitMQBinding
@@ -98,9 +98,9 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
             m_host = new ServiceHost(typeof (LogService), m_baseAddresses);
             m_alternativeHost = new ServiceHost(typeof(AlternativeLogService), m_baseAddresses);
 
-            StartService(binding, m_host, "LogService");
+            StartService(binding, m_host, "LogService?routingKey=Log");
 
-            StartService(binding, m_alternativeHost, "AnotherLog");
+            StartService(binding, m_alternativeHost, "AnotherLog?routingKey=Log");
 
             m_serviceStarted = true;
         }
@@ -133,7 +133,7 @@ namespace RabbitMQ.ServiceModel.Test.OneWayTest
 
         public ILogServiceContract GetClient(Binding binding)
         {
-            m_factory = new ChannelFactory<ILogServiceContract>(binding, new EndpointAddress("amqp://localhost/amq.direct"));
+            m_factory = new ChannelFactory<ILogServiceContract>(binding, new EndpointAddress("amqp://localhost/amq.direct?routingKey=Log"));
            
             m_factory.Open();
             return m_factory.CreateChannel();

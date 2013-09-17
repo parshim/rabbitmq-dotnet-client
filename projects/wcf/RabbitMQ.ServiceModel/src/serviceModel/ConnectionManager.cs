@@ -1,11 +1,10 @@
 using System;
 using System.Collections.Generic;
-using System.ServiceModel;
 using RabbitMQ.Client;
 
 namespace RabbitMQ.ServiceModel
 {
-    public class ConnectionManager
+    internal class ConnectionManager
     {
         private static readonly ConnectionManager m_instance = new ConnectionManager();
 
@@ -26,10 +25,10 @@ namespace RabbitMQ.ServiceModel
             model.Close((ushort) CurrentVersion.StatusCodes.Ok, "Goodbye");
         }
 
-        public IModel OpenModel(EndpointAddress address, RabbitMQTransportBindingElement bindingElement, TimeSpan timeout)
+        public IModel OpenModel(RabbitMQUri uri, IProtocol protocol, TimeSpan timeout)
         {
-            string host = address.Uri.Host;
-            int port = address.Uri.IsDefaultPort ? bindingElement.BrokerProtocol.DefaultPort : address.Uri.Port;
+            string host = uri.Host;
+            int port = uri.Port.HasValue ? uri.Port.Value : protocol.DefaultPort;
 
             ConnectionKey key = new ConnectionKey(host, port);
 
@@ -43,7 +42,7 @@ namespace RabbitMQ.ServiceModel
                 }
                 else
                 {
-                    connection = OpenConnection(key, bindingElement);
+                    connection = OpenConnection(key, uri, protocol);
 
                     m_connections.Add(key, connection);
                 }
@@ -56,29 +55,26 @@ namespace RabbitMQ.ServiceModel
             }
         }
 
-        private IConnection OpenConnection(ConnectionKey key, RabbitMQTransportBindingElement bindingElement)
+        private IConnection OpenConnection(ConnectionKey key, RabbitMQUri uri, IProtocol protocol)
         {
             ConnectionFactory connFactory = new ConnectionFactory
                 {
                     HostName = key.Host,
-                    Port = key.Port
+                    Port = key.Port,
+                    Protocol = protocol
                 };
 
-            if (bindingElement.BrokerProtocol != null)
+            if (uri.Username != null)
             {
-                connFactory.Protocol = bindingElement.BrokerProtocol;
+                connFactory.UserName = uri.Username;
             }
-            if (bindingElement.Username != null)
+            if (uri.Password != null)
             {
-                connFactory.UserName = bindingElement.Username;
+                connFactory.Password = uri.Password;
             }
-            if (bindingElement.Password != null)
+            if (uri.VirtualHost != null)
             {
-                connFactory.Password = bindingElement.Password;
-            }
-            if (bindingElement.VirtualHost != null)
-            {
-                connFactory.VirtualHost = bindingElement.VirtualHost;
+                connFactory.VirtualHost = uri.VirtualHost;
             }
 
             IConnection connection = connFactory.CreateConnection();

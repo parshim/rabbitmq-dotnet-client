@@ -74,7 +74,7 @@ namespace RabbitMQ.ServiceModel.Test
             tests.Add(new OneWayTest.OneWayTest());
             //tests.Add(new TwoWayTest.TwoWayTest());
             //tests.Add(new SessionTest.SessionTest());
-            //tests.Add(new DuplexTest.DuplexTest());
+            tests.Add(new DuplexTest.DuplexTest());
             //tests.Add(new FaultTest.FaultTest());
             Banner();
             

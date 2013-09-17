@@ -45,6 +45,17 @@
     <AssemblyInfoDetok>$(GensrcDir)$(AssemblyInfoBaseName)</AssemblyInfoDetok>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="src\serviceModel\Proxy\ProxyChannelFactory.cs" />
+    <Compile Include="src\serviceModel\Proxy\ProxyChannelListener.cs" />
+    <Compile Include="src\serviceModel\Proxy\ProxyDuplexChannel.cs" />
+    <Compile Include="src\serviceModel\Proxy\ProxyInputChannel.cs" />
+    <Compile Include="src\serviceModel\Proxy\ProxyOuputChannel.cs" />
+    <Compile Include="src\serviceModel\RabbitMQReplyToBindingElement.cs" />
+    <Compile Include="src\serviceModel\RabbitMQReplyToChannelFactory.cs" />
+    <Compile Include="src\serviceModel\RabbitMQReplyToChannelListener.cs" />
+    <Compile Include="src\serviceModel\RabbitMQReplyToOutputChannel.cs" />
+    <Compile Include="src\serviceModel\RabbitMQUri.cs" />
+    <Compile Include="src\serviceModel\ReplyToBehavior.cs" />
     <Tokenized Include="$(AssemblyInfoTok)" />
     <Detokenized Include="$(AssemblyInfoDetok)">
       <Link>properties\$(AssemblyInfoBaseName)</Link>
@@ -128,12 +139,12 @@
     <Compile Include="src\serviceModel\RabbitMQBindingConfigurationElement.cs" />
     <Compile Include="src\serviceModel\RabbitMQBindingSection.cs" />
     <Compile Include="src\serviceModel\RabbitMQChannelBase.cs" />
-    <Compile Include="src\serviceModel\RabbitMQChannelFactory.cs" />
-    <Compile Include="src\serviceModel\RabbitMQChannelListener.cs" />
+    <Compile Include="src\serviceModel\RabbitMQTransportChannelFactory.cs" />
+    <Compile Include="src\serviceModel\RabbitMQTransportChannelListener.cs" />
     <Compile Include="src\serviceModel\RabbitMQChannelListenerBase.cs" />
-    <Compile Include="src\serviceModel\RabbitMQInputChannel.cs" />
+    <Compile Include="src\serviceModel\RabbitMQTransportInputChannel.cs" />
     <Compile Include="src\serviceModel\RabbitMQInputChannelBase.cs" />
-    <Compile Include="src\serviceModel\RabbitMQOutputChannel.cs" />
+    <Compile Include="src\serviceModel\RabbitMQTransportOutputChannel.cs" />
     <Compile Include="src\serviceModel\RabbitMQOutputChannelBase.cs" />
     <Compile Include="src\serviceModel\RabbitMQTransportBindingElement.cs" />
     <Compile Include="src\serviceModel\RabbitMQTransportElement.cs" />

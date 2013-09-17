@@ -39,6 +39,9 @@
 //---------------------------------------------------------------------------
 
 
+using System;
+using System.ServiceModel.Description;
+
 namespace RabbitMQ.ServiceModel
 {
     using System.ServiceModel.Channels;
@@ -50,8 +53,6 @@ namespace RabbitMQ.ServiceModel
     /// </summary>
     public sealed class RabbitMQTransportBindingElement : TransportBindingElement, ITransactedBindingElement
     {
-        private string m_routingKey;
-
         /// <summary>
         /// Creates a new instance of the RabbitMQTransportBindingElement Class using the default protocol.
         /// </summary>
@@ -63,25 +64,64 @@ namespace RabbitMQ.ServiceModel
         private RabbitMQTransportBindingElement(RabbitMQTransportBindingElement other)
         {
             BrokerProtocol = other.BrokerProtocol;
-            Username = other.Username;
-            Password = other.Password;
-            VirtualHost = other.VirtualHost;
             MaxReceivedMessageSize = other.MaxReceivedMessageSize;
             TransactedReceiveEnabled = other.TransactedReceiveEnabled;
             TTL = other.TTL;
             PersistentDelivery = other.PersistentDelivery;
-            RoutingKey = other.RoutingKey;
             AutoBindExchange = other.AutoBindExchange;
+            ReplyToQueue = other.ReplyToQueue;
+            ReplyToExchange = other.ReplyToExchange;
+            OneWayOnly = other.OneWayOnly;
         }
         
         public override IChannelFactory<TChannel> BuildChannelFactory<TChannel>(BindingContext context)
         {
-            return (IChannelFactory<TChannel>)(object)new RabbitMQChannelFactory(context);
+            return new RabbitMQTransportChannelFactory<TChannel>(context);
         }
 
         public override IChannelListener<TChannel> BuildChannelListener<TChannel>(BindingContext context)
         {
-            return (IChannelListener<TChannel>)((object)new RabbitMQChannelListener(context));
+            bool autoDelete = false;
+
+            string bindToExchange = AutoBindExchange;
+
+            if (context.ListenUriBaseAddress == null)
+            {
+                if (ReplyToExchange == null)
+                {
+                    return null;
+                }
+
+                RabbitMQUri uri = new RabbitMQUri(ReplyToExchange);
+
+                context.ListenUriMode = ListenUriMode.Explicit;
+                
+                if (ReplyToQueue == null)
+                {
+                    autoDelete = true;
+
+                    bindToExchange = uri.Endpoint;
+
+                    context.ListenUriRelativeAddress = Guid.NewGuid().ToString();
+                }
+                else
+                {
+                    context.ListenUriRelativeAddress = ReplyToQueue;
+                }
+
+                if (uri.Port.HasValue)
+                {
+                    context.ListenUriBaseAddress = new Uri(string.Format("{0}://{1}:{2}/", Scheme, uri.Host, uri.Port));
+                }
+                else
+                {
+                    context.ListenUriBaseAddress = new Uri(string.Format("{0}://{1}/", Scheme, uri.Host));
+                }
+            }
+
+            Uri listenUri = new Uri(context.ListenUriBaseAddress, context.ListenUriRelativeAddress ?? "");
+            
+            return new RabbitMQTransportChannelListener<TChannel>(context, listenUri, autoDelete, bindToExchange);
         }
 
         public override bool CanBuildChannelFactory<TChannel>(BindingContext context)
@@ -91,6 +131,11 @@ namespace RabbitMQ.ServiceModel
 
         public override bool CanBuildChannelListener<TChannel>(BindingContext context)
         {
+            if (context.ListenUriMode == ListenUriMode.Unique && ReplyToExchange == null)
+            {
+                return false;
+            }
+
             return typeof(TChannel) == typeof(IInputChannel);
         }
 
@@ -135,31 +180,7 @@ namespace RabbitMQ.ServiceModel
         {
             get; set;
         }
-
-        /// <summary>
-        /// The username  to use when authenticating with the broker
-        /// </summary>
-        internal string Username
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Password to use when authenticating with the broker
-        /// </summary>
-        internal string Password
-        {
-            get; set;
-        }
-
-        /// <summary>
-        /// Specifies the broker virtual host
-        /// </summary>
-        internal string VirtualHost
-        {
-            get; set;
-        }
-
+        
         /// <summary>
         /// Specifies the version of the AMQP protocol that should be used to 
         /// communicate with the broker
@@ -167,15 +188,6 @@ namespace RabbitMQ.ServiceModel
         public IProtocol BrokerProtocol
         {
             get; set;
-        }
-
-        /// <summary>
-        /// Routing key for message dispatching
-        /// </summary>
-        public string RoutingKey
-        {
-            get { return m_routingKey ?? ""; }
-            set { m_routingKey = value; }
         }
 
         /// <summary>
@@ -194,5 +206,21 @@ namespace RabbitMQ.ServiceModel
         {
             get; set;
         }
+
+        /// <summary>
+        /// ReplyTo queue name for duplex communication
+        /// </summary>
+        /// <remarks>If null will auto delete queue will be generated</remarks>
+        public string ReplyToQueue { get; set; }
+        
+        /// <summary>
+        /// ReplyTo exchange URI for duplex communication callbacks
+        /// </summary>
+        public Uri ReplyToExchange { get; set; }
+
+        /// <summary>
+        /// Defines if one way or duplex comunication is required over this binding
+        /// </summary>
+        public bool OneWayOnly { get; set; }
     }
 }

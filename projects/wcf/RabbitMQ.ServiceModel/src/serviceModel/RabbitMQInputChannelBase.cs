@@ -47,19 +47,19 @@ namespace RabbitMQ.ServiceModel
 
     internal abstract class RabbitMQInputChannelBase : RabbitMQChannelBase, IInputChannel
     {
-        private EndpointAddress m_localAddress;
-        private CommunicationOperation<Message> m_receiveMethod;
-        private CommunicationOperation<bool, Message> m_tryReceiveMethod;
-        private CommunicationOperation<bool> m_waitForMessage;
+        private readonly EndpointAddress m_localAddress;
+        private readonly CommunicationOperation<Message> m_receiveMethod;
+        private readonly CommunicationOperation<bool, Message> m_tryReceiveMethod;
+        private readonly CommunicationOperation<bool> m_waitForMessage;
 
 
         protected RabbitMQInputChannelBase(BindingContext context, EndpointAddress localAddress)
         :base(context)
         {
             m_localAddress = localAddress;
-            m_receiveMethod = new CommunicationOperation<Message>(Receive);
-            m_tryReceiveMethod = new CommunicationOperation<bool, Message>(TryReceive);
-            m_waitForMessage = new CommunicationOperation<bool>(WaitForMessage);
+            m_receiveMethod = Receive;
+            m_tryReceiveMethod = TryReceive;
+            m_waitForMessage = WaitForMessage;
         }
 
 
@@ -111,7 +111,6 @@ namespace RabbitMQ.ServiceModel
         {
             return Receive(base.Context.Binding.ReceiveTimeout);
         }
-
         
         public EndpointAddress LocalAddress
         {

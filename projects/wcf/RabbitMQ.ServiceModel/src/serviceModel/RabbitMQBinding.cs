@@ -54,14 +54,12 @@ namespace RabbitMQ.ServiceModel
     public sealed class RabbitMQBinding : Binding
     {
         private long m_maxMessageSize;
-        private CompositeDuplexBindingElement m_compositeDuplex;
-        private TextMessageEncodingBindingElement m_encoding;
         private bool m_isInitialized;
-        private ReliableSessionBindingElement m_session;
-        private TransactionFlowBindingElement m_transactionFlow;
-        private bool m_transactionsEnabled;
-        private RabbitMQTransportBindingElement m_transport;
 
+        private CompositeDuplexBindingElement m_duplex;
+        private TextMessageEncodingBindingElement m_encoding;
+        private RabbitMQTransportBindingElement m_transport;
+        
         public static readonly long DefaultMaxMessageSize = 8192L;
 
         /// <summary>
@@ -76,19 +74,11 @@ namespace RabbitMQ.ServiceModel
         /// <summary>
         /// Uses the broker, login and protocol specified
         /// </summary>
-        /// <param name="username">The broker username to connect with</param>
-        /// <param name="password">The broker password to connect with</param>
-        /// <param name="virtualhost">The broker virtual host</param>
-        /// <param name="maxMessageSize">The largest allowable encoded message size</param>
+       /// <param name="maxMessageSize">The largest allowable encoded message size</param>
         /// <param name="protocol">The protocol version to use</param>
-        public RabbitMQBinding(String username, String password,  String virtualhost,
-                               long maxMessageSize, IProtocol protocol)
+        public RabbitMQBinding(long maxMessageSize, IProtocol protocol)
             : this(protocol)
         {
-            this.Transport.Username = username;
-            this.Transport.Password = password;
-            this.Transport.VirtualHost = virtualhost;
-            this.Transport.TransactedReceiveEnabled = false;
             this.MaxMessageSize = maxMessageSize;
         }
 
@@ -99,6 +89,11 @@ namespace RabbitMQ.ServiceModel
         public RabbitMQBinding(IProtocol protocol)
         {
             BrokerProtocol = protocol;
+
+            // Set defaults
+            this.OneWayOnly = true;
+            this.ExactlyOnce = false;
+
             base.Name = "RabbitMQBinding";
             base.Namespace = "http://schemas.rabbitmq.com/2007/RabbitMQ/";
 
@@ -111,22 +106,21 @@ namespace RabbitMQ.ServiceModel
             m_transport.TransactedReceiveEnabled = this.ExactlyOnce;
             m_transport.TTL = this.TTL;
             m_transport.PersistentDelivery = this.PersistentDelivery;
-            m_transport.RoutingKey = this.RoutingKey;
             m_transport.AutoBindExchange = this.AutoBindExchange;
+            m_transport.ReplyToQueue = this.ReplyToQueue;
+            m_transport.ReplyToExchange = this.ReplyToExchange;
+            m_transport.OneWayOnly = this.OneWayOnly;
+            
             if (MaxMessageSize != DefaultMaxMessageSize)
             {
                 m_transport.MaxReceivedMessageSize = MaxMessageSize;
             }
+
             BindingElementCollection elements = new BindingElementCollection();
 
-            if (m_transactionsEnabled)
-            {
-                elements.Add(m_transactionFlow);
-            }
             if (!OneWayOnly)
             {
-                elements.Add(m_session);
-                elements.Add(m_compositeDuplex);
+                elements.Add(m_duplex);
             }
             elements.Add(m_encoding);
             elements.Add(m_transport);
@@ -141,10 +135,9 @@ namespace RabbitMQ.ServiceModel
                 if (!m_isInitialized)
                 {
                     m_transport = new RabbitMQTransportBindingElement();
-                    m_encoding = new TextMessageEncodingBindingElement(); // new TextMessageEncodingBindingElement();
-                    m_session = new ReliableSessionBindingElement();
-                    m_compositeDuplex = new CompositeDuplexBindingElement();
-                    m_transactionFlow = new TransactionFlowBindingElement();
+                    m_encoding = new TextMessageEncodingBindingElement();
+                    m_duplex = new CompositeDuplexBindingElement();
+
                     m_maxMessageSize = DefaultMaxMessageSize;
                     m_isInitialized = true;
                 }
@@ -180,36 +173,7 @@ namespace RabbitMQ.ServiceModel
         {
             get { return m_transport; }
         }
-
-        /// <summary>
-        /// Gets the reliable session parameters for this binding instance
-        /// </summary>
-        public ReliableSession ReliableSession
-        {
-            get { return new ReliableSession(m_session); }
-        }
-
-        /// <summary>
-        /// Determines whether or not the TransactionFlowBindingElement will
-        /// be added to the channel stack
-        /// </summary>
-        public bool TransactionFlow
-        {
-            get { return m_transactionsEnabled; }
-            set { m_transactionsEnabled = value; }
-        }
-
-        /// <summary>
-        /// Specifies whether or not the CompositeDuplex and ReliableSession
-        /// binding elements are added to the channel stack.
-        /// </summary>
-        public bool OneWayOnly { get; set; }
-
-        /// <summary>
-        /// Message routing key
-        /// </summary>
-        public string RoutingKey { get; set; }
-
+        
         /// <summary>
         /// Enables transactional message delivery
         /// </summary>
@@ -221,6 +185,17 @@ namespace RabbitMQ.ServiceModel
         public string TTL { get; set; }
 
         /// <summary>
+        /// ReplyTo queue name for duplex communication
+        /// </summary>
+        /// <remarks>If null will auto delete queue will be generated</remarks>
+        public string ReplyToQueue { get; set; }
+
+        /// <summary>
+        /// ReplyTo exchange URI for duplex communication callbacks
+        /// </summary>
+        public Uri ReplyToExchange { get; set; }
+
+        /// <summary>
         /// Exchange name to bind the listening queue. Value can be null.
         /// </summary>
         /// <remarks>If null queue will not be binded automaticaly</remarks>
@@ -230,5 +205,10 @@ namespace RabbitMQ.ServiceModel
         /// Defines messages delivery mode
         /// </summary>
         public bool PersistentDelivery { get; set; }
+
+        /// <summary>
+        /// Defines if one way or duplex comunication is required over this binding
+        /// </summary>
+        public bool OneWayOnly { get; set; }
     }
 }
